@@ -57,10 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
-# Private configs
-options
-
-# Build flies
+# Build files
 build
 .vscode
 package-lock.json
