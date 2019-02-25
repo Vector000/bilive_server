@@ -63,6 +63,7 @@ options
 # Build flies
 build
 .vscode
-*.js
-*.json
-!pacnage.json
+package-lock.json
+
+# User generated options
+options
