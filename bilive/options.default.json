@@ -165,10 +165,20 @@
       "tip": "是否向该用户组发送lottery类抽奖消息, 例如舰队抽奖",
       "type": "boolean"
     },
-    "beatStorm": {
-      "description": "节奏风暴",
-      "tip": "是否向该用户组发送节奏风暴消息",
-      "type": "boolean"
+    "protocol": {
+      "description": "协议",
+      "tip": "该用户连接使用的协议",
+      "type": "string"
+    },
+    "ip": {
+      "description": "IP",
+      "tip": "该用户连接时的IP",
+      "type": "string"
+    },
+    "ua": {
+      "description": "UA",
+      "tip": "该用户连接所使用的UA",
+      "type": "string"
     }
   }
 }

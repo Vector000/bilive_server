@@ -16,6 +16,12 @@ class WSServer {
   //@ts-ignore
   private _loop: NodeJS.Timer
   /**
+   * 已连接用户记录
+   *
+   * @memberof WSServer
+   */
+  private _connectedUserList: Map<string, connectedUser> = new Map()
+  /**
    * 启动HTTP以及WebSocket服务
    *
    * @memberof WSServer
@@ -96,6 +102,11 @@ class WSServer {
           this._WsConnectionHandler(client, remoteAddress)
         }
         tools.Log(`${user} 地址: ${remoteAddress} 已连接. user-agent: ${useragent}`)
+        this._connectedUserList.set(remoteAddress, {
+          protocol: user,
+          ip: remoteAddress,
+          ua: (useragent === undefined ? 'undefined' : useragent)
+        })
       })
     this._loop = setInterval(() => this._WebSocketPing(), 60 * 1000)
   }
@@ -119,6 +130,7 @@ class WSServer {
       .on('close', (code, reason) => {
         delete tools.logs.onLog
         this._destroyClient(client)
+        this._connectedUserList.delete(remoteAddress)
         tools.Log(`管理员 地址: ${remoteAddress} 已断开`, code, reason)
       })
       .on('message', async (msg: string) => {
@@ -166,6 +178,7 @@ class WSServer {
         const clients = <Set<ws>>this._clients.get(protocol)
         clients.delete(client)
         if (clients.size === 0) this._clients.delete(protocol)
+        this._connectedUserList.delete(remoteAddress)
         tools.Log(`用户: ${protocol} 地址: ${remoteAddress} 已断开`, code, reason)
       })
       .on('pong', () => {
@@ -402,6 +415,12 @@ class WSServer {
         Options._.user[uid] = data
         Options.save()
         this._sendtoadmin({ cmd, ts, uid, data })
+      }
+        break
+      // 发送已连接用户数据
+      case 'connectedUserData': {
+        const data = [...this._connectedUserList.values()]
+        this._sendtoadmin({ cmd, ts, data })
       }
         break
       // 未知命令

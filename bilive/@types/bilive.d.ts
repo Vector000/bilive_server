@@ -520,5 +520,15 @@ interface adminMessage {
   ts: string
   msg?: string
   uid?: string
-  data?: config | optionsInfo | string[] | userData
+  data?: config | optionsInfo | string[] | userData | connectedUser[]
+}
+/**
+ * 已连接用户
+ *
+ * @interface connectedUser
+ */
+interface connectedUser {
+  protocol: string
+  ip: string
+  ua: string
 }
