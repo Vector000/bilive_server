@@ -1,10 +1,12 @@
 [![Paypal.me donate](https://img.shields.io/badge/Paypal.me-donate-yellow.svg)](https://www.paypal.me/lzppzr)
 
+这是一个次分支，感谢[原项目](https://github.com/lzghzr/bilive_server)的基础奠定
+
 ### 自行编译
   * 第一次使用
     1. 安装[Git](https://git-scm.com/downloads)
     2. 安装[Node.js](https://nodejs.org/)
-    3. 命令行 `git clone https://github.com/lzghzr/bilive_server.git`
+    3. 命令行 `git clone https://github.com/Vector000/bilive_server.git`
     4. 命令行 `cd bilive_server`
     5. 命令行 `mkdir options`
     6. 命令行 `cp nedb/roomList.db options/roomList.db`
