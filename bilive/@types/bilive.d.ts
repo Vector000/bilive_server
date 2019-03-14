@@ -20,7 +20,8 @@ interface server {
   protocol: string
 }
 interface config {
-  [index: string]: string | string[]
+  [index: string]: number | string | string[]
+  dbTime: number
   liveOrigin: string
   apiVCOrigin: string
   apiLiveOrigin: string

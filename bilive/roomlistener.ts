@@ -39,10 +39,10 @@ class RoomListener extends EventEmitter {
    * 添加数据库内房间
    *
    * @private
-   * @param {number} [date=30 * 24 * 60 * 60 * 1000]
+   * @param {number} [date=Options._.config.dbTime * 24 * 60 * 60 * 1000]
    * @memberof RoomListener
    */
-  private async _AddDBRoom(date = 30 * 24 * 60 * 60 * 1000) {
+  private async _AddDBRoom(date = Options._.config.dbTime * 24 * 60 * 60 * 1000) {
     const roomList = await db.roomList.find<roomList>({ updateTime: { $gt: Date.now() - date } })
     if (roomList instanceof Error) tools.ErrorLog('读取数据库失败', roomList)
     else {

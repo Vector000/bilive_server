@@ -6,6 +6,7 @@
     "protocol": "admin"
   },
   "config": {
+    "dbTime": 30,
     "liveOrigin": "https://live.bilibili.com",
     "apiLiveOrigin": "https://api.live.bilibili.com",
     "apiVCOrigin": "https://api.vc.bilibili.com",
