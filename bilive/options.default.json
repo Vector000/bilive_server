@@ -91,6 +91,11 @@
     "beatStorm": false
   },
   "info": {
+    "dbTime": {
+      "description": "活跃房间时间",
+      "tip": "监听过去N天内的活跃房间",
+      "type": "number"
+    },
     "liveOrigin": {
       "description": "直播首页",
       "tip": "直播首页地址",

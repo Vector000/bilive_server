@@ -42,7 +42,7 @@ class RoomListener extends EventEmitter {
    * @param {number} [date=Options._.config.dbTime * 24 * 60 * 60 * 1000]
    * @memberof RoomListener
    */
-  private async _AddDBRoom(date = Options._.config.dbTime * 24 * 60 * 60 * 1000) {
+  public async _AddDBRoom(date = Options._.config.dbTime * 24 * 60 * 60 * 1000) {
     const roomList = await db.roomList.find<roomList>({ updateTime: { $gt: Date.now() - date } })
     if (roomList instanceof Error) tools.ErrorLog('读取数据库失败', roomList)
     else {
@@ -58,6 +58,7 @@ class RoomListener extends EventEmitter {
           .Close()
         this.roomList.delete(roomID)
       })
+      tools.Log(`已连接到 ${roomList.length} 个房间`)
     }
     setTimeout(() => this._AddDBRoom(), 7 * 24 * 60 * 60 * 1000)
   }

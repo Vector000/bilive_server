@@ -314,6 +314,7 @@ class WSServer {
       case 'setConfig': {
         const config = Options._.config
         const sysmsg = config.sysmsg
+        const time = config.dbTime
         const setConfig = <config>message.data || {}
         let msg = ''
         for (const i in config) {
@@ -329,6 +330,7 @@ class WSServer {
           Options.save()
           this._sendtoadmin({ cmd, ts, data: config })
           if (sysmsg !== config.sysmsg) this.SysMsg(config.sysmsg)
+          if (time !== config.dbTime) Options.emit('clientUpdate')
         }
         else this._sendtoadmin({ cmd, ts, msg, data: config })
       }

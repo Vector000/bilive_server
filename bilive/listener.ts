@@ -98,6 +98,7 @@ class Listener extends EventEmitter {
       .on('lottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
       .on('beatStorm', (beatStormMessage: beatStormMessage) => this._RaffleHandler(beatStormMessage))
       .Start()
+    Options.on('clientUpdate', () => this._RoomListener._AddDBRoom())
   }
   /**
    * 更新分区房间
