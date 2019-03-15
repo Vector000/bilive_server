@@ -58,7 +58,7 @@ class RoomListener extends EventEmitter {
           .Close()
         this.roomList.delete(roomID)
       })
-      tools.Log(`已连接到 ${roomList.length} 个房间`)
+      tools.Log(`已连接到数据库中的 ${roomList.length} 个房间`)
     }
     setTimeout(() => this._AddDBRoom(), 7 * 24 * 60 * 60 * 1000)
   }

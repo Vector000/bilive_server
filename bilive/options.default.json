@@ -7,6 +7,7 @@
   },
   "config": {
     "dbTime": 30,
+    "adminServerChan": "",
     "liveOrigin": "https://live.bilibili.com",
     "apiLiveOrigin": "https://api.live.bilibili.com",
     "apiVCOrigin": "https://api.vc.bilibili.com",
@@ -95,6 +96,11 @@
       "description": "活跃房间时间",
       "tip": "监听过去N天内的活跃房间",
       "type": "number"
+    },
+    "adminServerChan": {
+      "description": "SCKEY",
+      "tip": "Server酱对应的KEY",
+      "type": "string"
     },
     "liveOrigin": {
       "description": "直播首页",

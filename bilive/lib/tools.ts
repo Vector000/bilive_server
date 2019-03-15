@@ -117,6 +117,22 @@ function ErrorLog(...message: any[]) {
   console.error(`${new Date().toString().slice(4, 24)} :`, ...message)
 }
 /**
+ * Send ServerChan message
+ * 
+ * @param {string} message
+ */
+function sendSCMSG(message: string) {
+  const adminServerChan = Options._.config.adminServerChan
+  if (adminServerChan !== '') {
+    const sendtoadmin: request.Options = {
+      method: 'POST',
+      uri: `https://sc.ftqq.com/${adminServerChan}.send`,
+      body: `text=bilive_server&desp=${message}`
+    }
+    XHR<serverChan>(sendtoadmin)
+  }
+}
+/**
  * sleep
  *
  * @param {number} ms
@@ -125,4 +141,4 @@ function ErrorLog(...message: any[]) {
 function Sleep(ms: number): Promise<'sleep'> {
   return new Promise<'sleep'>(resolve => setTimeout(() => resolve('sleep'), ms))
 }
-export default { XHR, JSONparse, Hash, Log, logs, ErrorLog, Sleep }
+export default { XHR, JSONparse, Hash, Log, logs, ErrorLog, sendSCMSG, Sleep }
