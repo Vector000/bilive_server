@@ -118,8 +118,8 @@ class Listener extends EventEmitter {
     logMsg += `共监听到活动抽奖数：${raffleSize}\n`
     logMsg += `共监听到大航海抽奖数：${lotterySize}\n`
     logMsg += `共监听到节奏风暴抽奖数：${beatStormSize}\n`
-    logMsg += `raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+smallTVSize+raffleSize)).toFixed(1)}%)\n`
-    logMsg += `lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+lotterySize+beatStormSize)).toFixed(1)}%)\n`
+    logMsg += `raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+smallTVSize+raffleSize)*100).toFixed(1)}%)\n`
+    logMsg += `lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+lotterySize+beatStormSize)*100).toFixed(1)}%)\n`
     tools.Log(logMsg)
     let pushMsg: string = ''
     pushMsg += `### bilive_server 监听情况报告\n`
@@ -127,8 +127,8 @@ class Listener extends EventEmitter {
     pushMsg += `- 共监听到活动抽奖数：${raffleSize}\n`
     pushMsg += `- 共监听到大航海抽奖数：${lotterySize}\n`
     pushMsg += `- 共监听到节奏风暴抽奖数：${beatStormSize}\n`
-    pushMsg += `- raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+smallTVSize+raffleSize)).toFixed(1)}%)\n`
-    pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+lotterySize+beatStormSize)).toFixed(1)}%)\n`
+    pushMsg += `- raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+smallTVSize+raffleSize)*100).toFixed(1)}%)\n`
+    pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+lotterySize+beatStormSize)*100).toFixed(1)}%)\n`
     tools.sendSCMSG(pushMsg)
   }
   /**
