@@ -76,7 +76,8 @@
       "USER_INFO_UPDATE",
       "MESSAGEBOX_USER_GAIN_MEDAL",
       "LOL_ACTIVITY",
-      "new_anchor_reward"
+      "new_anchor_reward",
+      "SCORE_CARD"
     ],
     "sysmsg": ""
   },
