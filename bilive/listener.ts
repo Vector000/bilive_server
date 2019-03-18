@@ -1,3 +1,4 @@
+import { Options as requestOptions } from 'request'
 import { EventEmitter } from 'events'
 import tools from './lib/tools'
 import AppClient from './lib/app_client'
@@ -59,6 +60,14 @@ class Listener extends EventEmitter {
   private _beatStormID: Set<number> = new Set()
   private _dailyBeatStormID: Set<number> = new Set()
   /**
+   * 消息缓存
+   *
+   * @private
+   * @type {Set<string>}
+   * @memberof Listener
+   */
+  private _MSGCache: Set<string> = new Set()
+  /**
    * 房间监听
    *
    * @private
@@ -89,7 +98,7 @@ class Listener extends EventEmitter {
    */
   public Start() {
     this.updateAreaRoom()
-    setInterval(() => this.updateAreaRoom(), 5 * 60 * 1000)
+    setInterval(() => this.updateAreaRoom(), 10 * 60 * 1000)
     this._RoomListener = new RoomListener()
     this._RoomListener
       .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
@@ -219,15 +228,9 @@ class Listener extends EventEmitter {
         if (this._DMclient.has(roomID)) return
         const newDMclient = new DMclient({ roomID })
         newDMclient
-          .on('TV_START', dataJson => this._RaffleStartHandler(dataJson))
-          .on('RAFFLE_START', dataJson => this._RaffleStartHandler(dataJson))
-          .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
-          .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
-          .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
-          .on('ALL_MSG', dataJson => {
-          if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
-        })
-        .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
+          .on('SYS_MSG', dataJson => this._SYSMSGHandler(dataJson))
+          .on('SYS_GIFT', dataJson => this._SYSGiftHandler(dataJson))
+          .Connect()
         this._DMclient.set(roomID, newDMclient)
       })
       // 移除房间
@@ -239,77 +242,94 @@ class Listener extends EventEmitter {
     }
   }
   /**
-   * 监听抽奖
+   * 监听弹幕系统消息
    *
    * @private
-   * @param {RAFFLE_START} dataJson
+   * @param {SYS_MSG} dataJson
    * @memberof Listener
    */
-  private _RaffleStartHandler(dataJson: RAFFLE_START) {
-    if (dataJson.data === undefined || dataJson.data.raffleId === undefined) return
-    const cmd = dataJson.data.type === 'small_tv' ? 'smallTV' : 'raffle'
-    const raffleMessage: raffleMessage = {
-      cmd,
-      roomID: dataJson._roomid,
-      id: +dataJson.data.raffleId,
-      type: dataJson.data.type,
-      title: dataJson.data.title,
-      time: +dataJson.data.time,
-      max_time: +dataJson.data.max_time,
-      time_wait: +dataJson.data.time_wait
+  private _SYSMSGHandler(dataJson: SYS_MSG) {
+    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
+    this._MSGCache.add(dataJson.msg_text)
+    const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
+    const roomID = +dataJson.real_roomid
+    this._RaffleCheck(url, roomID)
+  }
+  /**
+   * 监听系统礼物消息
+   *
+   * @private
+   * @param {SYS_GIFT} dataJson
+   * @memberof Listener
+   */
+  private _SYSGiftHandler(dataJson: SYS_GIFT) {
+    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
+    this._MSGCache.add(dataJson.msg_text)
+    const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname
+    const roomID = +dataJson.real_roomid
+    this._RaffleCheck(url, roomID)
+  }
+  /**
+   * 检查房间抽奖raffle信息
+   *
+   * @private
+   * @param {string} url
+   * @param {number} roomID
+   * @memberof Listener
+   */
+  private async _RaffleCheck(url: string, roomID: number) {
+    // 等待3s, 防止土豪刷屏
+    await tools.Sleep(3000)
+    const check: requestOptions = {
+      uri: `${url}/check?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
+      json: true
     }
-    this._RaffleHandler(raffleMessage)
-  }
-  /**
-   * 监听快速抽奖
-   *
-   * @private
-   * @param {LOTTERY_START} dataJson
-   * @memberof Listener
-   */
-  private _LotteryStartHandler(dataJson: LOTTERY_START) {
-    if (dataJson.data === undefined || dataJson.data.id === undefined) return
-    const lotteryMessage: lotteryMessage = {
-      cmd: 'lottery',
-      roomID: dataJson._roomid,
-      id: +dataJson.data.id,
-      type: dataJson.data.type,
-      title: '舰队抽奖',
-      time: +dataJson.data.lottery.time
+    const raffleCheck = await tools.XHR<raffleCheck>(check, 'Android')
+    if (raffleCheck !== undefined && raffleCheck.response.statusCode === 200
+      && raffleCheck.body.code === 0 && raffleCheck.body.data.list.length > 0) {
+      raffleCheck.body.data.list.forEach(data => {
+        const message: message = {
+          cmd: data.type === 'small_tv' ? 'smallTV' : 'raffle',
+          roomID,
+          id: +data.raffleId,
+          type: data.type,
+          title: data.title,
+          time: +data.time,
+          max_time: +data.max_time,
+          time_wait: +data.time_wait
+        }
+        this._RaffleHandler(message)
+      })
     }
-    this._RaffleHandler(lotteryMessage)
   }
   /**
-   * 监听特殊礼物消息
+   * 检查房间抽奖lottery信息
    *
    * @private
-   * @param {SPECIAL_GIFT} dataJson
+   * @param {string} url
+   * @param {number} roomID
    * @memberof Listener
    */
-  private _SpecialGiftHandler(dataJson: SPECIAL_GIFT) {
-    if (dataJson.data['39'] !== undefined) this._BeatStormHandler(dataJson)
-  }
-  /**
-   * 监听节奏风暴消息
-   *
-   * @private
-   * @param {SPECIAL_GIFT} dataJson
-   * @memberof Listener
-   */
-  private _BeatStormHandler(dataJson: SPECIAL_GIFT) {
-    const beatStormData = dataJson.data['39']
-    // @ts-ignore
-    if (beatStormData.content !== undefined) {
-      const beatStormMessage: beatStormMessage = {
-        cmd: 'beatStorm',
-        roomID: dataJson._roomid,
-        id: +beatStormData.id,
-        type: 'beatStorm',
-        title: '节奏风暴',
-        // @ts-ignore
-        time: beatStormData.time
-      }
-      this._RaffleHandler(beatStormMessage)
+  // @ts-ignore 暂时无用
+  private async _LotteryCheck(url: string, roomID: number) {
+    const check: requestOptions = {
+      uri: `${url}/check?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
+      json: true
+    }
+    const lotteryCheck = await tools.XHR<lotteryCheck>(check, 'Android')
+    if (lotteryCheck !== undefined && lotteryCheck.response.statusCode === 200
+      && lotteryCheck.body.code === 0 && lotteryCheck.body.data.guard.length > 0) {
+      lotteryCheck.body.data.guard.forEach(data => {
+        const message: message = {
+          cmd: 'lottery',
+          roomID,
+          id: +data.id,
+          type: data.keyword,
+          title: '舰队抽奖',
+          time: +data.time
+        }
+        this._RaffleHandler(message)
+      })
     }
   }
   /**
