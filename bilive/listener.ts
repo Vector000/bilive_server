@@ -1,4 +1,3 @@
-import { Options as requestOptions } from 'request'
 import { EventEmitter } from 'events'
 import tools from './lib/tools'
 import AppClient from './lib/app_client'
@@ -16,7 +15,7 @@ class Listener extends EventEmitter {
     super()
   }
   /**
-   * 用于接收弹幕消息
+   * 多分区监听，用于接收弹幕消息
    *
    * @private
    * @type {Map<number, DMclient>}
@@ -31,6 +30,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _smallTVID: Set<number> = new Set()
+  private _dailySmallTVID: Set<number> = new Set()
   /**
    * 抽奖ID
    *
@@ -39,6 +39,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _raffleID: Set<number> = new Set()
+  private _dailyRaffleID: Set<number> = new Set()
   /**
    * 快速抽奖ID
    *
@@ -47,6 +48,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _lotteryID: Set<number> = new Set()
+  private _dailyLotteryID: Set<number> = new Set()
   /**
    * 节奏风暴ID
    *
@@ -55,14 +57,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _beatStormID: Set<number> = new Set()
-  /**
-   * 消息缓存
-   *
-   * @private
-   * @type {Set<string>}
-   * @memberof Listener
-   */
-  private _MSGCache: Set<string> = new Set()
+  private _dailyBeatStormID: Set<number> = new Set()
   /**
    * 房间监听
    *
@@ -104,84 +99,94 @@ class Listener extends EventEmitter {
       .Start()
     Options.on('clientUpdate', () => this._RoomListener._AddDBRoom())
     setInterval(() => this.logAllID(), 6 * 60 * 60 * 1000)
-    setInterval(() => this.clearAllID(), 7 * 24 * 60 * 60 * 1000)
+    setInterval(() => this.clearAllID(), 24 * 60 * 60 * 1000)
   }
   /**
-   * 清空所有ID缓存
+   * 清空每日ID缓存
    *
    * @memberof Listener
    */
-  public clearAllID() {
-    this._beatStormID.clear()
-    this._smallTVID.clear()
-    this._raffleID.clear()
-    this._lotteryID.clear()
+  private clearAllID() {
+    this._dailyBeatStormID.clear()
+    this._dailySmallTVID.clear()
+    this._dailyRaffleID.clear()
+    this._dailyLotteryID.clear()
   }
   /**
-   * log ID cache and calculate missing rate
+   * 计算遗漏数量
+   *
+   * @param {Array<number>, Array<number>} 
+   * @memberof Listener
+   */
+  private getMisses(query1: Array<number>, query2: Array<number>) {
+    let start1 = query1[0] > 0 ? query1[0] : 0
+    let end1 = query1[query1.length-1] > 0 ? query1[query1.length-1] : 0
+    let start2 = query2[0] > 0 ? query2[0] : 0
+    let end2 = query2[query2.length-1] > 0 ? query2[query2.length-1] : 0
+    let Start, End: number
+    if (start1 > 0 && (start2 === 0 || start1 < start2)) Start = start1
+    else if (start2 > 0 && (start1 === 0 || start2 < start1)) Start = start2
+    else Start = 0
+    if (end1 > 0 && (end2 === 0 || end1 > end2)) End = end1
+    else if (end2 > 0 && (end1 === 0 || end2 > end1)) End = end2
+    else End = 0
+    let Misses = End - Start + 1 - query1.length - query2.length
+    if (query1.length + query2.length === 0) Misses -= 1
+    return Misses
+  }
+  /**
+   * 监听数据Log
    * 
    * @memberof Listener
    */
-  public async logAllID() {
-    let smallTVSize = this._smallTVID.size
-    let raffleSize = this._raffleID.size
-    let lotterySize = this._lotteryID.size
-    let beatStormSize = this._beatStormID.size
+  private async logAllID() {
     let smallTVArray = [...this._smallTVID]
     let raffleArray = [...this._raffleID]
     let lotteryArray = [...this._lotteryID]
     let beatStormArray = [...this._beatStormID]
-    for (let n=0; n<beatStormSize; n++) {
+    let dailySmallTVArray = [...this._dailySmallTVID]
+    let dailyRaffleArray = [...this._dailyRaffleID]
+    let dailyLotteryArray = [...this._dailyLotteryID]
+    let dailyBeatStormArray = [...this._dailyBeatStormID]
+    for (let n=0; n<this._beatStormID.size; n++) {
       let item = beatStormArray[n]
       let tmp = item.toString().slice(0, -6)
       beatStormArray[n] = Number(tmp)
     }
-    let smallTVStart = smallTVArray[0] > 0 ? smallTVArray[0] : 0
-    let smallTVEnd = smallTVArray[smallTVSize-1] > 0 ? smallTVArray[smallTVSize-1] : 0
-    let raffleStart = raffleArray[0] > 0 ? raffleArray[0] : 0
-    let raffleEnd = raffleArray[raffleSize-1] > 0 ? raffleArray[raffleSize-1] : 0
-    let lotteryStart = lotteryArray[0] > 0 ? lotteryArray[0] : 0
-    let lotteryEnd = lotteryArray[lotterySize-1] > 0 ? lotteryArray[lotterySize-1] : 0
-    let beatStormStart = beatStormArray[0] > 0 ? beatStormArray[0] : 0
-    let beatStormEnd = beatStormArray[beatStormSize-1] ? beatStormArray[beatStormSize-1] : 0
-    let RaffleStart, RaffleEnd, LotteryStart, LotteryEnd: number
-    if (smallTVStart > 0 && (raffleStart === 0 || smallTVStart < raffleStart)) RaffleStart = smallTVStart
-    else if (raffleStart > 0 && (smallTVStart === 0 || raffleStart < smallTVStart)) RaffleStart = raffleStart
-    else RaffleStart = 0
-    if (smallTVEnd > 0 && (raffleEnd === 0 || smallTVEnd > raffleEnd)) RaffleEnd = smallTVEnd
-    else if (raffleEnd > 0 && (smallTVEnd === 0 || raffleEnd > smallTVEnd)) RaffleEnd = raffleEnd
-    else RaffleEnd = 0
-    if (lotteryStart > 0 && (beatStormStart === 0 || lotteryStart < beatStormStart)) LotteryStart = lotteryStart
-    else if (beatStormStart > 0 && (beatStormStart === 0 || beatStormStart < lotteryStart)) LotteryStart = beatStormStart
-    else LotteryStart = 0
-    if (lotteryEnd > 0 && (beatStormEnd === 0 || lotteryEnd > beatStormEnd)) LotteryEnd = lotteryEnd
-    else if (beatStormEnd > 0 && (lotteryEnd === 0 || beatStormEnd > lotteryEnd)) LotteryEnd = beatStormEnd
-    else LotteryEnd = 0
-    let raffleMisses = RaffleEnd - RaffleStart + 1 - smallTVSize - raffleSize
-    if (smallTVSize + raffleSize === 0) raffleMisses -= 1
-    let lotteryMisses = LotteryEnd - LotteryStart + 1 - lotterySize - beatStormSize
-    if (lotterySize + beatStormSize === 0) lotteryMisses -= 1
+    for (let n=0; n<this._dailyBeatStormID.size; n++) {
+      let item = dailyBeatStormArray[n]
+      let tmp = item.toString().slice(0, -6)
+      dailyBeatStormArray[n] = Number(tmp)
+    }
+    let raffleMisses = this.getMisses(smallTVArray, raffleArray)
+    let lotteryMisses = this.getMisses(lotteryArray, beatStormArray)
+    let dailyRaffleMisses = this.getMisses(dailySmallTVArray, dailyRaffleArray)
+    let dailyLotteryMisses = this.getMisses(dailyLotteryArray, dailyBeatStormArray)
     let logMsg: string = '\n'
     logMsg += `/********************************* bilive_server 运行信息 *********************************/\n`
     logMsg += `本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
     logMsg += `统计数据刷新于：${new Date(this._StatRefreshTime).toString()}\n`
-    logMsg += `共监听到小电视抽奖数：${smallTVSize}\n`
-    logMsg += `共监听到活动抽奖数：${raffleSize}\n`
-    logMsg += `共监听到大航海抽奖数：${lotterySize}\n`
-    logMsg += `共监听到节奏风暴抽奖数：${beatStormSize}\n`
-    logMsg += `raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+smallTVSize+raffleSize)*100).toFixed(1)}%)\n`
-    logMsg += `lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+lotterySize+beatStormSize)*100).toFixed(1)}%)\n`
+    logMsg += `共监听到小电视抽奖数：${this._smallTVID.size}\n`
+    logMsg += `共监听到活动抽奖数：${this._raffleID.size}\n`
+    logMsg += `共监听到大航海抽奖数：${this._lotteryID.size}\n`
+    logMsg += `共监听到节奏风暴抽奖数：${this._beatStormID.size}\n`
+    logMsg += `raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+this._smallTVID.size+this._raffleID.size)*100).toFixed(1)}%)\n`
+    logMsg += `lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
+    logMsg += `上次刷新后raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
+    logMsg += `上次刷新后lottery漏监听：${dailyLotteryMisses}(${(dailyLotteryMisses/(dailyLotteryMisses+this._dailyLotteryID.size+this._dailyBeatStormID.size)*100).toFixed(1)}%)\n`
     tools.Log(logMsg)
     let pushMsg: string = ''
-    pushMsg += `### bilive_server 监听情况报告\n`
+    pushMsg += `# bilive_server 监听情况报告\n`
     pushMsg += `- 本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
     pushMsg += `- 统计数据刷新于：${new Date(this._StatRefreshTime).toString()}\n`
-    pushMsg += `- 共监听到小电视抽奖数：${smallTVSize}\n`
-    pushMsg += `- 共监听到活动抽奖数：${raffleSize}\n`
-    pushMsg += `- 共监听到大航海抽奖数：${lotterySize}\n`
-    pushMsg += `- 共监听到节奏风暴抽奖数：${beatStormSize}\n`
-    pushMsg += `- raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+smallTVSize+raffleSize)*100).toFixed(1)}%)\n`
-    pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+lotterySize+beatStormSize)*100).toFixed(1)}%)\n`
+    pushMsg += `- 共监听到小电视抽奖数：${this._smallTVID.size}\n`
+    pushMsg += `- 共监听到活动抽奖数：${this._raffleID.size}\n`
+    pushMsg += `- 共监听到大航海抽奖数：${this._lotteryID.size}\n`
+    pushMsg += `- 共监听到节奏风暴抽奖数：${this._beatStormID.size}\n`
+    pushMsg += `- raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+this._smallTVID.size+this._raffleID.size)*100).toFixed(1)}%)\n`
+    pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
+    pushMsg += `- 上次刷新后raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
+    pushMsg += `- 上次刷新后lottery漏监听：${dailyLotteryMisses}(${(dailyLotteryMisses/(dailyLotteryMisses+this._dailyLotteryID.size+this._dailyBeatStormID.size)*100).toFixed(1)}%)\n`
     tools.sendSCMSG(pushMsg)
   }
   /**
@@ -208,9 +213,15 @@ class Listener extends EventEmitter {
         if (this._DMclient.has(roomID)) return
         const newDMclient = new DMclient({ roomID })
         newDMclient
-          .on('SYS_MSG', dataJson => this._SYSMSGHandler(dataJson))
-          .on('SYS_GIFT', dataJson => this._SYSGiftHandler(dataJson))
-          .Connect()
+          .on('TV_START', dataJson => this._RaffleStartHandler(dataJson))
+          .on('RAFFLE_START', dataJson => this._RaffleStartHandler(dataJson))
+          .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
+          .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
+          .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
+          .on('ALL_MSG', dataJson => {
+          if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
+        })
+        .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
         this._DMclient.set(roomID, newDMclient)
       })
       // 移除房间
@@ -222,94 +233,77 @@ class Listener extends EventEmitter {
     }
   }
   /**
-   * 监听弹幕系统消息
+   * 监听抽奖
    *
    * @private
-   * @param {SYS_MSG} dataJson
+   * @param {RAFFLE_START} dataJson
    * @memberof Listener
    */
-  private _SYSMSGHandler(dataJson: SYS_MSG) {
-    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
-    this._MSGCache.add(dataJson.msg_text)
-    const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
-    const roomID = +dataJson.real_roomid
-    this._RaffleCheck(url, roomID)
+  private _RaffleStartHandler(dataJson: RAFFLE_START) {
+    if (dataJson.data === undefined || dataJson.data.raffleId === undefined) return
+    const cmd = dataJson.data.type === 'small_tv' ? 'smallTV' : 'raffle'
+    const raffleMessage: raffleMessage = {
+      cmd,
+      roomID: dataJson._roomid,
+      id: +dataJson.data.raffleId,
+      type: dataJson.data.type,
+      title: dataJson.data.title,
+      time: +dataJson.data.time,
+      max_time: +dataJson.data.max_time,
+      time_wait: +dataJson.data.time_wait
+    }
+    this._RaffleHandler(raffleMessage)
   }
   /**
-   * 监听系统礼物消息
+   * 监听快速抽奖
    *
    * @private
-   * @param {SYS_GIFT} dataJson
+   * @param {LOTTERY_START} dataJson
    * @memberof Listener
    */
-  private _SYSGiftHandler(dataJson: SYS_GIFT) {
-    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
-    this._MSGCache.add(dataJson.msg_text)
-    const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname
-    const roomID = +dataJson.real_roomid
-    this._RaffleCheck(url, roomID)
+  private _LotteryStartHandler(dataJson: LOTTERY_START) {
+    if (dataJson.data === undefined || dataJson.data.id === undefined) return
+    const lotteryMessage: lotteryMessage = {
+      cmd: 'lottery',
+      roomID: dataJson._roomid,
+      id: +dataJson.data.id,
+      type: dataJson.data.type,
+      title: '舰队抽奖',
+      time: +dataJson.data.lottery.time
+    }
+    this._RaffleHandler(lotteryMessage)
   }
   /**
-   * 检查房间抽奖raffle信息
+   * 监听特殊礼物消息
    *
    * @private
-   * @param {string} url
-   * @param {number} roomID
+   * @param {SPECIAL_GIFT} dataJson
    * @memberof Listener
    */
-  private async _RaffleCheck(url: string, roomID: number) {
-    // 等待3s, 防止土豪刷屏
-    await tools.Sleep(3000)
-    const check: requestOptions = {
-      uri: `${url}/check?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
-      json: true
-    }
-    const raffleCheck = await tools.XHR<raffleCheck>(check, 'Android')
-    if (raffleCheck !== undefined && raffleCheck.response.statusCode === 200
-      && raffleCheck.body.code === 0 && raffleCheck.body.data.list.length > 0) {
-      raffleCheck.body.data.list.forEach(data => {
-        const message: message = {
-          cmd: data.type === 'small_tv' ? 'smallTV' : 'raffle',
-          roomID,
-          id: +data.raffleId,
-          type: data.type,
-          title: data.title,
-          time: +data.time,
-          max_time: +data.max_time,
-          time_wait: +data.time_wait
-        }
-        this._RaffleHandler(message)
-      })
-    }
+  private _SpecialGiftHandler(dataJson: SPECIAL_GIFT) {
+    if (dataJson.data['39'] !== undefined) this._BeatStormHandler(dataJson)
   }
   /**
-   * 检查房间抽奖lottery信息
+   * 监听节奏风暴消息
    *
    * @private
-   * @param {string} url
-   * @param {number} roomID
+   * @param {SPECIAL_GIFT} dataJson
    * @memberof Listener
    */
-  // @ts-ignore 暂时无用
-  private async _LotteryCheck(url: string, roomID: number) {
-    const check: requestOptions = {
-      uri: `${url}/check?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
-      json: true
-    }
-    const lotteryCheck = await tools.XHR<lotteryCheck>(check, 'Android')
-    if (lotteryCheck !== undefined && lotteryCheck.response.statusCode === 200
-      && lotteryCheck.body.code === 0 && lotteryCheck.body.data.guard.length > 0) {
-      lotteryCheck.body.data.guard.forEach(data => {
-        const message: message = {
-          cmd: 'lottery',
-          roomID,
-          id: +data.id,
-          type: data.keyword,
-          title: '舰队抽奖',
-          time: +data.time
-        }
-        this._RaffleHandler(message)
-      })
+  private _BeatStormHandler(dataJson: SPECIAL_GIFT) {
+    const beatStormData = dataJson.data['39']
+    // @ts-ignore
+    if (beatStormData.content !== undefined) {
+      const beatStormMessage: beatStormMessage = {
+        cmd: 'beatStorm',
+        roomID: dataJson._roomid,
+        id: +beatStormData.id,
+        type: 'beatStorm',
+        title: '节奏风暴',
+        // @ts-ignore
+        time: beatStormData.time
+      }
+      this._RaffleHandler(beatStormMessage)
     }
   }
   /**
@@ -325,18 +319,22 @@ class Listener extends EventEmitter {
       case 'smallTV':
         if (this._smallTVID.has(id)) return
         this._smallTVID.add(id)
+        this._dailySmallTVID.add(id)
         break
       case 'raffle':
         if (this._raffleID.has(id)) return
         this._raffleID.add(id)
+        this._dailyRaffleID.add(id)
         break
       case 'lottery':
         if (this._lotteryID.has(id)) return
         this._lotteryID.add(id)
+        this._dailyLotteryID.add(id)
         break
       case 'beatStorm':
         if (this._beatStormID.has(id)) return
         this._beatStormID.add(id)
+        this._dailyBeatStormID.add(id)
         break
       default:
         return
