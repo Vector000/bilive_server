@@ -111,6 +111,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private clearAllID() {
+    this._StatRefreshTime = Date.now()
     this._dailyBeatStormID.clear()
     this._dailySmallTVID.clear()
     this._dailyRaffleID.clear()
