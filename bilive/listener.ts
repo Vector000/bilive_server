@@ -89,7 +89,7 @@ class Listener extends EventEmitter {
    */
   public Start() {
     this.updateAreaRoom()
-    setInterval(() => this.updateAreaRoom(), 10 * 60 * 1000)
+    setInterval(() => this.updateAreaRoom(), 5 * 60 * 1000)
     this._RoomListener = new RoomListener()
     this._RoomListener
       .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
@@ -172,10 +172,10 @@ class Listener extends EventEmitter {
     logMsg += `/********************************* bilive_server 运行信息 *********************************/\n`
     logMsg += `本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
     logMsg += `统计数据刷新于：${new Date(this._StatRefreshTime).toString()}\n`
-    logMsg += `共监听到小电视抽奖数：${this._smallTVID.size}\n`
-    logMsg += `共监听到活动抽奖数：${this._raffleID.size}\n`
-    logMsg += `共监听到大航海抽奖数：${this._lotteryID.size}\n`
-    logMsg += `共监听到节奏风暴抽奖数：${this._beatStormID.size}\n`
+    logMsg += `共监听到小电视抽奖数：${this._smallTVID.size}(${this._dailySmallTVID.size})\n`
+    logMsg += `共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
+    logMsg += `共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
+    logMsg += `共监听到节奏风暴抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
     logMsg += `raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+this._smallTVID.size+this._raffleID.size)*100).toFixed(1)}%)\n`
     logMsg += `lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
     logMsg += `上次刷新后raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
@@ -185,10 +185,10 @@ class Listener extends EventEmitter {
     pushMsg += `# bilive_server 监听情况报告\n`
     pushMsg += `- 本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
     pushMsg += `- 统计数据刷新于：${new Date(this._StatRefreshTime).toString()}\n`
-    pushMsg += `- 共监听到小电视抽奖数：${this._smallTVID.size}\n`
-    pushMsg += `- 共监听到活动抽奖数：${this._raffleID.size}\n`
-    pushMsg += `- 共监听到大航海抽奖数：${this._lotteryID.size}\n`
-    pushMsg += `- 共监听到节奏风暴抽奖数：${this._beatStormID.size}\n`
+    pushMsg += `- 共监听到小电视抽奖数：${this._smallTVID.size}(${this._dailySmallTVID.size})\n`
+    pushMsg += `- 共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
+    pushMsg += `- 共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
+    pushMsg += `- 共监听到节奏风暴抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
     pushMsg += `- raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+this._smallTVID.size+this._raffleID.size)*100).toFixed(1)}%)\n`
     pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
     pushMsg += `- 上次刷新后raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
