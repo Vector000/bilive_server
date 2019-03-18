@@ -210,7 +210,7 @@ class Listener extends EventEmitter {
       // 获取房间列表
       getAllList.body.data.module_list.forEach(modules => {
         if (modules.module_info.type !== 2 && modules.list.length > 2) {
-          for (let i = 0; i < 3; i++) roomIDs.add((<getAllListDataRoomList>modules.list[i]).roomid)
+          for (let i = 0; i < modules.list.length; i++) roomIDs.add((<getAllListDataRoomList>modules.list[i]).roomid)
         }
       })
       // 添加房间

@@ -78,7 +78,9 @@
       "LOL_ACTIVITY",
       "new_anchor_reward",
       "ROOM_SKIN_MSG",
-      "SCORE_CARD"
+      "SCORE_CARD",
+      "ROOM_REAL_TIME_MESSAGE_UPDATE",
+      "WIN_ACTIVITY"
     ],
     "sysmsg": ""
   },
