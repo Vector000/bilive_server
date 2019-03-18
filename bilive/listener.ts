@@ -98,7 +98,11 @@ class Listener extends EventEmitter {
       .on('beatStorm', (beatStormMessage: beatStormMessage) => this._RaffleHandler(beatStormMessage))
       .Start()
     Options.on('clientUpdate', () => this._RoomListener._AddDBRoom())
-    setInterval(() => this.logAllID(), 6 * 60 * 60 * 1000)
+    let i = 0
+    setInterval(() => {
+      i++
+      this.logAllID(i)
+    }, 60 * 60 * 1000)
     setInterval(() => this.clearAllID(), 24 * 60 * 60 * 1000)
   }
   /**
@@ -137,9 +141,10 @@ class Listener extends EventEmitter {
   /**
    * 监听数据Log
    * 
+   * @param {number}
    * @memberof Listener
    */
-  private async logAllID() {
+  private async logAllID(int: number) {
     let smallTVArray = [...this._smallTVID]
     let raffleArray = [...this._raffleID]
     let lotteryArray = [...this._lotteryID]
@@ -187,7 +192,7 @@ class Listener extends EventEmitter {
     pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
     pushMsg += `- 上次刷新后raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
     pushMsg += `- 上次刷新后lottery漏监听：${dailyLotteryMisses}(${(dailyLotteryMisses/(dailyLotteryMisses+this._dailyLotteryID.size+this._dailyBeatStormID.size)*100).toFixed(1)}%)\n`
-    tools.sendSCMSG(pushMsg)
+    if (int % 6 === 0) tools.sendSCMSG(pushMsg)
   }
   /**
    * 更新分区房间
