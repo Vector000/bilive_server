@@ -141,13 +141,8 @@ class Listener extends EventEmitter {
   private getMisses(Set1: Set<number>, Set2: Set<number>) {
     let query1 = [...Set1]
     let query2 = [...Set2]
-    if (query2[0].toString().length > 6) {
-      for (let n = 0; n < query2.length; n++) {
-        let item = query2[n]
-        let tmp = item.toString().slice(0, -6)
-        query2[n] = Number(tmp)
-      }
-    }
+    if (query2.length > 0 && query2[0].toString().length > 6) 
+      query2.forEach(item => item = Number(item.toString().slice(0, -6)))
     let start1 = query1[0] > 0 ? query1[0] : 0
     let end1 = query1[query1.length-1] > 0 ? query1[query1.length-1] : 0
     let start2 = query2[0] > 0 ? query2[0] : 0
