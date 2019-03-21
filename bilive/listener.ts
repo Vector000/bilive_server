@@ -141,8 +141,11 @@ class Listener extends EventEmitter {
   private getMisses(Set1: Set<number>, Set2: Set<number>) {
     let query1 = [...Set1]
     let query2 = [...Set2]
-    if (query2.length > 0 && query2[0].toString().length > 6) 
-      query2.forEach(item => item = Number(item.toString().slice(0, -6)))
+    if (query2.length > 0 && query2[0].toString().length > 6) {
+      for (let i = 0; i < query2.length; i++) {
+        query2[i] = Number(query2[i].toString().slice(0, -6))
+      }
+    }
     let start1 = query1[0] > 0 ? query1[0] : 0
     let end1 = query1[query1.length-1] > 0 ? query1[query1.length-1] : 0
     let start2 = query2[0] > 0 ? query2[0] : 0
@@ -209,8 +212,8 @@ class Listener extends EventEmitter {
       const roomIDs: Set<number> = new Set()
       // 获取房间列表
       getAllList.body.data.module_list.forEach(modules => {
-        if (modules.module_info.type !== 2 && modules.list.length > 2) {
-          for (let i = 0; i < 3; i++) roomIDs.add((<getAllListDataRoomList>modules.list[i]).roomid)
+        if (modules.module_info.type === 9 && modules.list.length > 2) {
+          for (let i = 0; i < modules.list.length; i++) roomIDs.add((<getAllListDataRoomList>modules.list[i]).roomid)
         }
       })
       // 添加房间
