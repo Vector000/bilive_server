@@ -80,7 +80,9 @@
       "ROOM_SKIN_MSG",
       "SCORE_CARD",
       "ROOM_REAL_TIME_MESSAGE_UPDATE",
-      "WIN_ACTIVITY"
+      "WIN_ACTIVITY",
+      "LUCK_GIFT_AWARD_USER",
+      "LUCK_GIFT_AWARD_MASTER"
     ],
     "sysmsg": ""
   },
