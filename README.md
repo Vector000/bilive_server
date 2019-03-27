@@ -22,6 +22,6 @@
     4. 命令行 `npm run build`
     5. 命令行 `npm start`
 
-[点此进行设置](https://vector000.github.io/bilive_setting/#path=ws://localhost:20080&protocol=admin)
+[点此进行设置](http://vector000.coding.me/bilive_setting/#path=ws://localhost:20080&protocol=admin)
 
 此为服务端, 仅用来监听房间弹幕, 更多功能请使用[客户端](https://github.com/Vector000/bilive_client)
