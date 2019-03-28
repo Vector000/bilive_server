@@ -93,7 +93,7 @@ class Listener extends EventEmitter {
    */
   public Start() {
     this.updateAreaRoom()
-    setInterval(() => this.updateAreaRoom(), 10 * 60 * 1000)
+    setInterval(() => this.updateAreaRoom(), 5 * 60 * 1000)
     this._RoomListener = new RoomListener()
     this._RoomListener
       .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
