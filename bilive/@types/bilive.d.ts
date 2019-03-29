@@ -22,6 +22,7 @@ interface server {
 interface config {
   [index: string]: number | string | string[]
   dbTime: number
+  resetTime: number
   adminServerChan: string
   liveOrigin: string
   apiVCOrigin: string

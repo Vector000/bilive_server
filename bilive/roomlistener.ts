@@ -60,7 +60,7 @@ class RoomListener extends EventEmitter {
       })
       tools.Log(`已连接到数据库中的 ${roomList.length} 个房间`)
     }
-    setTimeout(() => this._AddDBRoom(), 7 * 24 * 60 * 60 * 1000)
+    setTimeout(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
   }
   /**
    * 添加直播房间
