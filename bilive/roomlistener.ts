@@ -145,19 +145,15 @@ class RoomListener extends EventEmitter {
    */
   private _BeatStormHandler(dataJson: SPECIAL_GIFT) {
     const beatStormData = dataJson.data['39']
-    // @ts-ignore
-    if (beatStormData.content !== undefined) {
-      const beatStormMessage: beatStormMessage = {
-        cmd: 'beatStorm',
-        roomID: dataJson._roomid,
-        id: +beatStormData.id,
-        type: 'beatStorm',
-        title: '节奏风暴',
-        // @ts-ignore
-        time: beatStormData.time
-      }
-      this.emit('beatStorm', beatStormMessage)
+    const beatStormMessage: beatStormMessage = {
+      cmd: 'beatStorm',
+      roomID: dataJson._roomid,
+      id: +beatStormData.id,
+      type: 'beatStorm',
+      title: '节奏风暴',
+      time: Date.now()
     }
+    this.emit('beatStorm', beatStormMessage)
   }
   /**
    * 写入数据库
