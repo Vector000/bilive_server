@@ -315,6 +315,7 @@ class WSServer {
         const config = Options._.config
         const sysmsg = config.sysmsg
         const time = config.dbTime
+        const refreshTime = config.resetTime
         const setConfig = <config>message.data || {}
         let msg = ''
         for (const i in config) {
@@ -330,7 +331,8 @@ class WSServer {
           Options.save()
           this._sendtoadmin({ cmd, ts, data: config })
           if (sysmsg !== config.sysmsg) this.SysMsg(config.sysmsg)
-          if (time !== config.dbTime) Options.emit('clientUpdate')
+          if (time !== config.dbTime) Options.emit('dbTimeUpdate')
+          if (refreshTime !== config.resetTime) Options.emit('resetTimeUpdate')
         }
         else this._sendtoadmin({ cmd, ts, msg, data: config })
       }

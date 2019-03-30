@@ -22,6 +22,8 @@ class RoomListener extends EventEmitter {
    * @memberof RoomListener
    */
   public roomList: Map<number, DMclient> = new Map()
+  // 数据库房间刷新计时器
+  private _DBRefreshLoop!: NodeJS.Timer
   /**
    * 开始监听
    *
@@ -34,6 +36,11 @@ class RoomListener extends EventEmitter {
       this._AddDBRoom()
     }
     else tools.ErrorLog(load)
+    this._DBRefreshLoop = setTimeout(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
+    Options.on('resetTimeUpdate', () => {
+      clearTimeout(this._DBRefreshLoop)
+      this._DBRefreshLoop = setTimeout(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
+    })
   }
   /**
    * 添加数据库内房间
@@ -60,7 +67,6 @@ class RoomListener extends EventEmitter {
       })
       tools.Log(`已连接到数据库中的 ${roomList.length} 个房间`)
     }
-    setTimeout(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
   }
   /**
    * 添加直播房间
