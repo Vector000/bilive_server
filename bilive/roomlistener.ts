@@ -36,10 +36,10 @@ class RoomListener extends EventEmitter {
       this._AddDBRoom()
     }
     else tools.ErrorLog(load)
-    this._DBRefreshLoop = setTimeout(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
+    this._DBRefreshLoop = setInterval(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
     Options.on('resetTimeUpdate', () => {
       clearTimeout(this._DBRefreshLoop)
-      this._DBRefreshLoop = setTimeout(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
+      this._DBRefreshLoop = setInterval(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
     })
   }
   /**
