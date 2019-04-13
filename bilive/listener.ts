@@ -100,6 +100,8 @@ class Listener extends EventEmitter {
       .on('raffle', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('lottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
       .on('beatStorm', (beatStormMessage: beatStormMessage) => this._RaffleHandler(beatStormMessage))
+      .on('lottery2', (lotteryMessage: lotteryMessage) => this._RaffleHandler2(lotteryMessage))
+      .on('beatStorm2', (beatStormMessage: beatStormMessage) => this._RaffleHandler2(beatStormMessage))
       .Start()
     Options.on('dbTimeUpdate', () => this._RoomListener._AddDBRoom())
     this.loop = setInterval(() => this._loop(), 55 * 1000)
@@ -141,24 +143,18 @@ class Listener extends EventEmitter {
   private getMisses(Set1: Set<number>, Set2: Set<number>) {
     let query1 = [...Set1]
     let query2 = [...Set2]
-    if (query2.length > 0 && query2[0].toString().length > 6) {
-      for (let i = 0; i < query2.length; i++) {
-        query2[i] = Number(query2[i].toString().slice(0, -6))
-      }
+    if (query2.length > 0 && query2[0].toString().length > 6) { // For beatStorm IDs
+      for (let i = 0; i < query2.length; i++) query2[i] = Number(query2[i].toString().slice(0, -6))
     }
-    let start1 = query1[0] > 0 ? query1[0] : 0
-    let end1 = query1[query1.length-1] > 0 ? query1[query1.length-1] : 0
-    let start2 = query2[0] > 0 ? query2[0] : 0
-    let end2 = query2[query2.length-1] > 0 ? query2[query2.length-1] : 0
-    let Start, End: number
-    if (start1 > 0 && (start2 === 0 || start1 < start2)) Start = start1
-    else if (start2 > 0 && (start1 === 0 || start2 < start1)) Start = start2
-    else Start = 0
-    if (end1 > 0 && (end2 === 0 || end1 > end2)) End = end1
-    else if (end2 > 0 && (end1 === 0 || end2 > end1)) End = end2
-    else End = 0
-    let Misses = End - Start + 1 - query1.length - query2.length
-    if (query1.length + query2.length === 0) Misses -= 1
+    let query = query1.concat(query2).sort(function(a, b){return a - b})
+    let Start: number = 0
+    let End: number = 0
+    if (query.length > 0) {
+      Start = query[0]
+      End = query[query.length-1]
+    }
+    let Misses = End - Start + 1 - query.length
+    if (query.length === 0) Misses -= 1
     return Misses
   }
   /**
@@ -296,36 +292,6 @@ class Listener extends EventEmitter {
     }
   }
   /**
-   * 检查房间抽奖lottery信息
-   *
-   * @private
-   * @param {string} url
-   * @param {number} roomID
-   * @memberof Listener
-   */
-  // @ts-ignore 暂时无用
-  private async _LotteryCheck(url: string, roomID: number) {
-    const check: requestOptions = {
-      uri: `${url}/check?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
-      json: true
-    }
-    const lotteryCheck = await tools.XHR<lotteryCheck>(check, 'Android')
-    if (lotteryCheck !== undefined && lotteryCheck.response.statusCode === 200
-      && lotteryCheck.body.code === 0 && lotteryCheck.body.data.guard.length > 0) {
-      lotteryCheck.body.data.guard.forEach(data => {
-        const message: message = {
-          cmd: 'lottery',
-          roomID,
-          id: +data.id,
-          type: data.keyword,
-          title: '舰队抽奖',
-          time: +data.time
-        }
-        this._RaffleHandler(message)
-      })
-    }
-  }
-  /**
    * 监听抽奖消息
    *
    * @private
@@ -362,6 +328,31 @@ class Listener extends EventEmitter {
     this._RoomListener.AddRoom(roomID)
     tools.Log(`房间 ${roomID} 开启了第 ${id} 轮${raffleMessage.title}`)
     this._RoomListener.UpdateDB(roomID, cmd)
+  }
+  /**
+   * 监听抽奖消息2
+   *
+   * @private
+   * @param {lotteryMessage | beatStormMessage} raffleMessage
+   * @memberof Listener
+   */
+  private _RaffleHandler2(lotteryMessage: lotteryMessage | beatStormMessage) {
+    const { cmd, id, roomID } = lotteryMessage
+    switch (cmd) {
+      case 'lottery':
+        if (this._lotteryID.has(id)) return
+        this._lotteryID.add(id)
+        this._dailyLotteryID.add(id)
+        break
+      case 'beatStorm':
+        if (this._beatStormID.has(id)) return
+        this._beatStormID.add(id)
+        this._dailyBeatStormID.add(id)
+        break
+      default: return
+    }
+    this.emit(cmd, lotteryMessage)
+    tools.Log(`房间 ${roomID} 开启了第 ${id} 轮${lotteryMessage.title}`)
   }
 }
 export default Listener

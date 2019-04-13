@@ -21,9 +21,12 @@ class RoomListener extends EventEmitter {
    * @type {Map<number, DMclient>}
    * @memberof RoomListener
    */
-  public roomList: Map<number, DMclient> = new Map()
-  // 数据库房间刷新计时器
-  private _DBRefreshLoop!: NodeJS.Timer
+  private roomList: Map<number, DMclient> = new Map()
+  private liveRoomList: Map<number, DMclient> = new Map()
+  // 弹幕error计数
+  private _DMErrorCount: number = 0
+  // 弹幕error刷新计时器
+  private _DMErrorTimer!: NodeJS.Timer
   /**
    * 开始监听
    *
@@ -34,13 +37,15 @@ class RoomListener extends EventEmitter {
     if (load === null) {
       tools.Log('roomList was loaded')
       this._AddDBRoom()
+      this._AddLiveRoom()
     }
     else tools.ErrorLog(load)
-    this._DBRefreshLoop = setInterval(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
-    Options.on('resetTimeUpdate', () => {
-      clearTimeout(this._DBRefreshLoop)
-      this._DBRefreshLoop = setInterval(() => this._AddDBRoom(), Options._.config.resetTime * 60 * 60 * 1000)
-    })
+    this._DMErrorTimer = setInterval(() => {
+      if (this._DMErrorCount > 60) this._ResetRoom()
+      this._DMErrorCount = 0
+    }, 60 * 1000)
+    setInterval(() => this._AddDBRoom(), 24 * 60 * 60 * 1000)
+    setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
   }
   /**
    * 添加数据库内房间
@@ -58,7 +63,7 @@ class RoomListener extends EventEmitter {
         liveList.add(room.roomID)
         this.AddRoom(room.roomID, room.masterID)
       })
-      this.roomList.forEach((commentClient, roomID) => {
+      this.roomList.forEach(async (commentClient, roomID) => {
         if (liveList.has(roomID)) return
         commentClient
           .removeAllListeners()
@@ -67,6 +72,66 @@ class RoomListener extends EventEmitter {
       })
       tools.Log(`已连接到数据库中的 ${roomList.length} 个房间`)
     }
+  }
+  /**
+   * 添加已开播房间
+   * 
+   * @private
+   * @memberof RoomListener
+   */
+  private async _AddLiveRoom() {
+    const liveRoomInfo: requestOptions = {
+      uri: `https://api.live.bilibili.com/room/v1/Area/getLiveRoomCountByAreaID?areaId=0`,
+      json: true
+    }
+    const liveRooms = await tools.XHR<liveRooms>(liveRoomInfo)
+    if (liveRooms === undefined || liveRooms.response.statusCode !== 200 || liveRooms.body.code !== 0) return
+    const liveNumber = liveRooms.body.data.num
+    let roomSet: Set<number> = new Set()
+    for (let i = 1; i <= Math.ceil(liveNumber / 500); i++) {
+      let allRoom = await tools.XHR<allRooms>({
+        uri: `https://api.live.bilibili.com/room/v1/Area/getListByAreaID?page=${i}&pageSize=500`,
+        json: true
+      })
+      if (allRoom === undefined || allRoom.body.code !== 0) continue
+      else if (allRoom.response.statusCode !== 200) return tools.Log(allRoom.response.statusCode)
+      let allRoomData = allRoom.body.data
+      allRoomData.forEach(room => {
+        if (this.roomList.has(room.roomid)) return
+        roomSet.add(room.roomid)
+        this.AddLiveRoom(room.roomid, room.uid)
+      })
+      await tools.Sleep(3 * 1000)
+    }
+    this.liveRoomList.forEach(async (commentClient, roomID) => {
+      if (roomSet.has(roomID)) return
+      commentClient
+        .removeAllListeners()
+        .Close()
+      this.liveRoomList.delete(roomID)
+    })
+    tools.Log(`已连接到 ${liveNumber} 个开播房间`)
+  }
+  /**
+   * 重设监听
+   *
+   * @memberof RoomListener
+   */
+  private async _ResetRoom() {
+    clearInterval(this._DMErrorTimer)
+    this.roomList.forEach(async (commentClient, roomID) => {
+      commentClient
+        .removeAllListeners()
+        .Close()
+      this.roomList.delete(roomID)
+    })
+    this.liveRoomList.forEach(async (commentClient, roomID) => {
+      commentClient
+        .removeAllListeners()
+        .Close()
+      this.liveRoomList.delete(roomID)
+    })
+    await this.Start()
   }
   /**
    * 添加直播房间
@@ -88,8 +153,31 @@ class RoomListener extends EventEmitter {
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
       })
+      .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
     this.roomList.set(roomID, commentClient)
+  }
+  /**
+   * 添加直播房间2
+   *
+   * @param {number} roomID
+   * @param {number} userID
+   * @memberof RoomListener
+   */
+  public async AddLiveRoom(roomID: number, userID: number = 0) {
+    if (this.liveRoomList.has(roomID)) return
+    if (userID === 0) userID = await this._getMasterID(roomID)
+    const commentClient = new DMclient({ roomID, userID, protocol: 'flash' })
+    commentClient
+      .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, 2))
+      .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, 2))
+      .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, 2))
+      .on('ALL_MSG', dataJson => {
+        if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
+      })
+      .on('DMerror', () => this._DMErrorCount++)
+      .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
+    this.liveRoomList.set(roomID, commentClient)
   }
   /**
    * 监听抽奖
@@ -118,9 +206,10 @@ class RoomListener extends EventEmitter {
    *
    * @private
    * @param {LOTTERY_START} dataJson
+   * @param {null | 2} source
    * @memberof RoomListener
    */
-  private _LotteryStartHandler(dataJson: LOTTERY_START) {
+  private _LotteryStartHandler(dataJson: LOTTERY_START, source: null | 2 = null) {
     if (dataJson.data === undefined || dataJson.data.id === undefined) return
     const lotteryMessage: lotteryMessage = {
       cmd: 'lottery',
@@ -130,26 +219,28 @@ class RoomListener extends EventEmitter {
       title: '舰队抽奖',
       time: +dataJson.data.lottery.time
     }
-    this.emit('lottery', lotteryMessage)
+    this.emit(`lottery${source}`, lotteryMessage)
   }
   /**
    * 监听特殊礼物消息
    *
    * @private
    * @param {SPECIAL_GIFT} dataJson
+   * @param {null | 2} source
    * @memberof RoomListener
    */
-  private _SpecialGiftHandler(dataJson: SPECIAL_GIFT) {
-    if (dataJson.data['39'] !== undefined) this._BeatStormHandler(dataJson)
+  private _SpecialGiftHandler(dataJson: SPECIAL_GIFT, source: null | 2 = null) {
+    if (dataJson.data['39'] !== undefined) this._BeatStormHandler(dataJson, source)
   }
   /**
    * 监听节奏风暴消息
    *
    * @private
    * @param {SPECIAL_GIFT} dataJson
+   * @param {null | 2} source
    * @memberof RoomListener
    */
-  private _BeatStormHandler(dataJson: SPECIAL_GIFT) {
+  private _BeatStormHandler(dataJson: SPECIAL_GIFT, source: null | 2 = null) {
     const beatStormData = dataJson.data['39']
     const beatStormMessage: beatStormMessage = {
       cmd: 'beatStorm',
@@ -159,7 +250,7 @@ class RoomListener extends EventEmitter {
       title: '节奏风暴',
       time: Date.now()
     }
-    this.emit('beatStorm', beatStormMessage)
+    this.emit(`beatStorm${source}`, beatStormMessage)
   }
   /**
    * 写入数据库
@@ -200,4 +291,24 @@ class RoomListener extends EventEmitter {
     return 0
   }
 }
+interface liveRooms {
+  code: number
+  data: liveRoomNum
+  message: string
+  msg: string
+}
+interface liveRoomNum {
+  num: number
+}
+interface allRooms {
+  code: number
+  data: allRoomsData[]
+  message: string
+  msg: string
+}
+interface allRoomsData {
+  uid: number
+  roomid: number 
+}
+
 export default RoomListener

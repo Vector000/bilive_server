@@ -7,7 +7,6 @@
   },
   "config": {
     "dbTime": 30,
-    "resetTime": 120,
     "adminServerChan": "",
     "liveOrigin": "https://live.bilibili.com",
     "apiLiveOrigin": "https://api.live.bilibili.com",
@@ -102,11 +101,6 @@
     "dbTime": {
       "description": "活跃房间时间",
       "tip": "监听过去N天内的活跃房间",
-      "type": "number"
-    },
-    "resetTime": {
-      "description": "连接重设时间",
-      "tip": "每隔一段时间重新连接数据库，以小时为单位",
       "type": "number"
     },
     "adminServerChan": {
