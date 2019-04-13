@@ -169,9 +169,9 @@ class RoomListener extends EventEmitter {
     if (userID === 0) userID = await this._getMasterID(roomID)
     const commentClient = new DMclient({ roomID, userID, protocol: 'flash' })
     commentClient
-      .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, 2))
-      .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, 2))
-      .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, 2))
+      .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
+      .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
+      .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, '2'))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
       })
@@ -209,7 +209,7 @@ class RoomListener extends EventEmitter {
    * @param {null | 2} source
    * @memberof RoomListener
    */
-  private _LotteryStartHandler(dataJson: LOTTERY_START, source: null | 2 = null) {
+  private _LotteryStartHandler(dataJson: LOTTERY_START, source: '' | '2' = '') {
     if (dataJson.data === undefined || dataJson.data.id === undefined) return
     const lotteryMessage: lotteryMessage = {
       cmd: 'lottery',
@@ -226,10 +226,10 @@ class RoomListener extends EventEmitter {
    *
    * @private
    * @param {SPECIAL_GIFT} dataJson
-   * @param {null | 2} source
+   * @param {'' | '2'} source
    * @memberof RoomListener
    */
-  private _SpecialGiftHandler(dataJson: SPECIAL_GIFT, source: null | 2 = null) {
+  private _SpecialGiftHandler(dataJson: SPECIAL_GIFT, source: '' | '2' = '') {
     if (dataJson.data['39'] !== undefined) this._BeatStormHandler(dataJson, source)
   }
   /**
@@ -237,10 +237,10 @@ class RoomListener extends EventEmitter {
    *
    * @private
    * @param {SPECIAL_GIFT} dataJson
-   * @param {null | 2} source
+   * @param {'' | '2'} source
    * @memberof RoomListener
    */
-  private _BeatStormHandler(dataJson: SPECIAL_GIFT, source: null | 2 = null) {
+  private _BeatStormHandler(dataJson: SPECIAL_GIFT, source: '' | '2' = '') {
     const beatStormData = dataJson.data['39']
     const beatStormMessage: beatStormMessage = {
       cmd: 'beatStorm',
