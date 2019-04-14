@@ -23,6 +23,8 @@ class RoomListener extends EventEmitter {
    */
   private roomList: Map<number, DMclient> = new Map()
   private liveRoomList: Map<number, DMclient> = new Map()
+  private _DBRoomRefreshTimer!: NodeJS.Timer
+  private _LiveRoomRefreshTimer!: NodeJS.Timer
   // 弹幕error计数
   private _DMErrorCount: number = 0
   // 弹幕error刷新计时器
@@ -41,11 +43,14 @@ class RoomListener extends EventEmitter {
     }
     else tools.ErrorLog(load)
     this._DMErrorTimer = setInterval(() => {
-      if (this._DMErrorCount > 60) this._ResetRoom()
+      if (this._DMErrorCount > 30) {
+        tools.sendSCMSG(`过去一分钟内，检测到弹幕error${this._DMErrorCount}个，准备重设监听`)
+        this._ResetRoom()
+      }
       this._DMErrorCount = 0
     }, 60 * 1000)
-    setInterval(() => this._AddDBRoom(), 24 * 60 * 60 * 1000)
-    setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
+    this._DBRoomRefreshTimer = setInterval(() => this._AddDBRoom(), 24 * 60 * 60 * 1000)
+    this._LiveRoomRefreshTimer = setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
   }
   /**
    * 添加数据库内房间
@@ -119,6 +124,8 @@ class RoomListener extends EventEmitter {
    */
   private async _ResetRoom() {
     clearInterval(this._DMErrorTimer)
+    clearInterval(this._DBRoomRefreshTimer)
+    clearInterval(this._LiveRoomRefreshTimer)
     this.roomList.forEach(async (commentClient, roomID) => {
       commentClient
         .removeAllListeners()
@@ -150,6 +157,7 @@ class RoomListener extends EventEmitter {
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
+      .on('BOX_ACTIVITY_START', dataJson => tools.sendSCMSG(JSON.stringify(dataJson)))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
       })
@@ -172,6 +180,7 @@ class RoomListener extends EventEmitter {
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, '2'))
+      .on('BOX_ACTIVITY_START', dataJson => tools.sendSCMSG(JSON.stringify(dataJson)))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
       })
