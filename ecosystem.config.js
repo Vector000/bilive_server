@@ -1,7 +1,7 @@
 module.exports = {
   apps : [{
     name: 'bilive_server',
-    script: 'build/app.js',
+    script: 'npm start',
 
     // Options reference: https://pm2.io/doc/en/runtime/reference/ecosystem-file/
     args: '',

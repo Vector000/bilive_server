@@ -43,7 +43,7 @@ class RoomListener extends EventEmitter {
     }
     else tools.ErrorLog(load)
     this._DMErrorTimer = setInterval(() => {
-      if (this._DMErrorCount > 30) {
+      if (this._DMErrorCount > 60) {
         tools.sendSCMSG(`过去一分钟内，检测到弹幕error${this._DMErrorCount}个，准备重设监听`)
         this._ResetRoom()
       }
