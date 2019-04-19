@@ -1316,6 +1316,16 @@ interface USER_TITLE_GET_Data {
   level: number
 }
 /**
+ * 实物宝箱
+ * {"cmd":"BOX_ACTIVITY_START", "aid": 323,"_roomid":9950825}
+ *
+ * @interface BOX_ACTIVITY_START
+ * @extends {danmuJson}
+ */
+interface BOX_ACTIVITY_START extends danmuJson {
+  aid: number
+}
+/**
  * 画板活动
  *
  * @interface DRAW_UPDATE

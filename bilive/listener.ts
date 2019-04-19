@@ -100,6 +100,7 @@ class Listener extends EventEmitter {
       .on('raffle', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('lottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
       .on('beatStorm', (beatStormMessage: beatStormMessage) => this._RaffleHandler(beatStormMessage))
+      .on('box', (boxMessage: boxMessage) => this._RaffleHandler(boxMessage))
       .on('lottery2', (lotteryMessage: lotteryMessage) => this._RaffleHandler2(lotteryMessage))
       .on('beatStorm2', (beatStormMessage: beatStormMessage) => this._RaffleHandler2(beatStormMessage))
       .Start()
@@ -295,10 +296,10 @@ class Listener extends EventEmitter {
    * 监听抽奖消息
    *
    * @private
-   * @param {raffleMessage | lotteryMessage | beatStormMessage} raffleMessage
+   * @param {raffleMessage | lotteryMessage | beatStormMessage | boxMessage} raffleMessage
    * @memberof Listener
    */
-  private _RaffleHandler(raffleMessage: raffleMessage | lotteryMessage | beatStormMessage) {
+  private _RaffleHandler(raffleMessage: raffleMessage | lotteryMessage | beatStormMessage | boxMessage) {
     const { cmd, id, roomID } = raffleMessage
     switch (cmd) {
       case 'smallTV':
@@ -321,11 +322,12 @@ class Listener extends EventEmitter {
         this._beatStormID.add(id)
         this._dailyBeatStormID.add(id)
         break
+      case 'box': break
       default:
         return
     }
     this.emit(cmd, raffleMessage)
-    this._RoomListener.AddRoom(roomID)
+    if (cmd !== 'box') this._RoomListener.AddRoom(roomID)
     tools.Log(`房间 ${roomID} 开启了第 ${id} 轮${raffleMessage.title}`)
     this._RoomListener.UpdateDB(roomID, cmd)
   }

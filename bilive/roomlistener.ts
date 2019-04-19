@@ -40,10 +40,7 @@ class RoomListener extends EventEmitter {
       this._AddLiveRoom()
     }
     else tools.ErrorLog(load)
-    this._DMErrorTimer = setInterval(() => {
-      if (this._DMErrorCount > 60) this._ResetRoom()
-      this._DMErrorCount = 0
-    }, 60 * 1000)
+    this._DMErrorTimer = setInterval(() => this._ResetRoom(), 60 * 1000)
     setInterval(() => this._AddDBRoom(), 24 * 60 * 60 * 1000)
     setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
   }
@@ -118,6 +115,10 @@ class RoomListener extends EventEmitter {
    * @memberof RoomListener
    */
   private async _ResetRoom() {
+    if (this._DMErrorCount < 300) {
+      this._DMErrorCount = 0
+      return
+    }
     clearInterval(this._DMErrorTimer)
     this.roomList.forEach(async (commentClient, roomID) => {
       commentClient
@@ -150,6 +151,7 @@ class RoomListener extends EventEmitter {
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
+      .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
       })
@@ -230,7 +232,7 @@ class RoomListener extends EventEmitter {
    * @memberof RoomListener
    */
   private _SpecialGiftHandler(dataJson: SPECIAL_GIFT, source: '' | '2' = '') {
-    if (dataJson.data['39'] !== undefined) this._BeatStormHandler(dataJson, source)
+    if (dataJson.data['39'] !== undefined && dataJson.data['39'].action === 'start') this._BeatStormHandler(dataJson, source)
   }
   /**
    * 监听节奏风暴消息
@@ -241,16 +243,33 @@ class RoomListener extends EventEmitter {
    * @memberof RoomListener
    */
   private _BeatStormHandler(dataJson: SPECIAL_GIFT, source: '' | '2' = '') {
-    const beatStormData = dataJson.data['39']
+    const beatStormData = <SPECIAL_GIFT_data_beatStorm_start>dataJson.data['39']
     const beatStormMessage: beatStormMessage = {
       cmd: 'beatStorm',
       roomID: dataJson._roomid,
+      num: +beatStormData.num,
       id: +beatStormData.id,
       type: 'beatStorm',
       title: '节奏风暴',
       time: Date.now()
     }
     this.emit(`beatStorm${source}`, beatStormMessage)
+  }
+  /**
+   * 监听快速抽奖
+   *
+   * @private
+   * @param {BOX_ACTIVITY_START} dataJson
+   * @memberof RoomListener
+   */
+  private _BoxLotteryHandler(dataJson: BOX_ACTIVITY_START) {
+    const boxMessage: boxMessage = {
+      cmd: 'box',
+      roomID: dataJson._roomid,
+      id: +dataJson.aid,
+      title: '宝箱抽奖',
+    }
+    this.emit('box', boxMessage)
   }
   /**
    * 写入数据库

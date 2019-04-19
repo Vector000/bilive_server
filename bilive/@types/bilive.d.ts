@@ -320,9 +320,21 @@ interface beatStormMessage {
   cmd: 'beatStorm'
   roomID: number
   id: number
+  num: number
   type: string
   title: string
   time: number
+}
+/**
+ * 消息格式
+ *
+ * @interface boxMessage
+ */
+interface boxMessage {
+  cmd: 'box'
+  roomID: number
+  id: number
+  title: string
 }
 /**
  * 消息格式
