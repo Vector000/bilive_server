@@ -192,7 +192,7 @@ class Listener extends EventEmitter {
     pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
     pushMsg += `- 今日raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
     pushMsg += `- 今日lottery漏监听：${dailyLotteryMisses}(${(dailyLotteryMisses/(dailyLotteryMisses+this._dailyLotteryID.size+this._dailyBeatStormID.size)*100).toFixed(1)}%)\n`
-    if (int % 6 === 0) tools.sendSCMSG(pushMsg)
+    if (int % 8 === 0) tools.sendSCMSG(pushMsg)
   }
   /**
    * 更新分区房间

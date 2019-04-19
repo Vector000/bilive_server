@@ -23,6 +23,8 @@ class RoomListener extends EventEmitter {
    */
   private roomList: Map<number, DMclient> = new Map()
   private liveRoomList: Map<number, DMclient> = new Map()
+  private _DBRoomRefreshTimer!: NodeJS.Timer
+  private _LiveRoomRefreshTimer!: NodeJS.Timer
   // 弹幕error计数
   private _DMErrorCount: number = 0
   // 弹幕error刷新计时器
@@ -120,6 +122,8 @@ class RoomListener extends EventEmitter {
       return
     }
     clearInterval(this._DMErrorTimer)
+    clearInterval(this._DBRoomRefreshTimer)
+    clearInterval(this._LiveRoomRefreshTimer)
     this.roomList.forEach(async (commentClient, roomID) => {
       commentClient
         .removeAllListeners()
@@ -174,6 +178,7 @@ class RoomListener extends EventEmitter {
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, '2'))
+      .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
       })
