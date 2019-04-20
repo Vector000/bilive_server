@@ -39,12 +39,35 @@ class RoomListener extends EventEmitter {
     if (load === null) {
       tools.Log('roomList was loaded')
       this._AddDBRoom()
-      this._AddLiveRoom()
+      this._DBRoomRefreshTimer = setInterval(() => this._AddDBRoom(), 24 * 60 * 60 * 1000)
+      if (Options._.config.globalListener) {
+        this._AddLiveRoom()
+        this._LiveRoomRefreshTimer = setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
+      }
+      this._DMErrorTimer = setInterval(() => this._ResetRoom(), 60 * 1000)
     }
     else tools.ErrorLog(load)
-    this._DMErrorTimer = setInterval(() => this._ResetRoom(), 60 * 1000)
-    setInterval(() => this._AddDBRoom(), 24 * 60 * 60 * 1000)
-    setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
+  }
+  /**
+   * 全站开播房间监听-刷新
+   * 
+   * @public
+   */
+  public async _RefreshLiveRoomListener() {
+    if (Options._.config.globalListener) {
+      this._AddLiveRoom()
+      this._LiveRoomRefreshTimer = setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
+    }
+    else {
+      const len = this.liveRoomList.size
+      this.liveRoomList.forEach(async (commentClient, roomID) => {
+        commentClient
+          .removeAllListeners()
+          .Close()
+        this.liveRoomList.delete(roomID)
+      })
+      tools.Log(`已断开与 ${len} 个开播房间的连接`)
+    }
   }
   /**
    * 添加数据库内房间

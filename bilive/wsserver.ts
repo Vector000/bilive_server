@@ -315,6 +315,7 @@ class WSServer {
         const config = Options._.config
         const sysmsg = config.sysmsg
         const time = config.dbTime
+        const globalFlag = config.globalListener
         const setConfig = <config>message.data || {}
         let msg = ''
         for (const i in config) {
@@ -331,6 +332,7 @@ class WSServer {
           this._sendtoadmin({ cmd, ts, data: config })
           if (sysmsg !== config.sysmsg) this.SysMsg(config.sysmsg)
           if (time !== config.dbTime) Options.emit('dbTimeUpdate')
+          if (globalFlag !== config.globalListener) Options.emit('globalFlagUpdate')
         }
         else this._sendtoadmin({ cmd, ts, msg, data: config })
       }

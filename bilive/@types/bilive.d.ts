@@ -20,8 +20,9 @@ interface server {
   protocol: string
 }
 interface config {
-  [index: string]: number | string | string[]
+  [index: string]: number | boolean | string | string[]
   dbTime: number
+  globalListener: boolean
   adminServerChan: string
   liveOrigin: string
   apiVCOrigin: string

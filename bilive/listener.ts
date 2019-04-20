@@ -105,6 +105,7 @@ class Listener extends EventEmitter {
       .on('beatStorm2', (beatStormMessage: beatStormMessage) => this._RaffleHandler2(beatStormMessage))
       .Start()
     Options.on('dbTimeUpdate', () => this._RoomListener._AddDBRoom())
+    Options.on('globalFlagUpdate', () => this._RoomListener._RefreshLiveRoomListener())
     this.loop = setInterval(() => this._loop(), 55 * 1000)
   }
   /**
