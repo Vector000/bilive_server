@@ -66,8 +66,6 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _ListenStartTime: number = Date.now()
-  // 已连接房间列表
-  private roomList: Set<number> = new Set()
   /**
    * 消息缓存
    *
@@ -84,7 +82,6 @@ class Listener extends EventEmitter {
   public Start() {
     this._RoomListener = new RoomListener()
     this._RoomListener
-      .on('roomList', (roomList: Set<number>) => this.roomList = roomList)
       .on('SYS_MSG', dataJson => this._SYSMSGHandler(dataJson))
       .on('SYS_GIFT', dataJson => this._SYSGiftHandler(dataJson))
       .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
@@ -186,7 +183,6 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _SYSMSGHandler(dataJson: SYS_MSG) {
-    if (this.roomList.has(dataJson.real_roomid)) return
     if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
     this._MSGCache.add(dataJson.msg_text)
     const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
@@ -201,7 +197,6 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _SYSGiftHandler(dataJson: SYS_GIFT) {
-    if (this.roomList.has(dataJson.real_roomid)) return
     if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
     this._MSGCache.add(dataJson.msg_text)
     const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname

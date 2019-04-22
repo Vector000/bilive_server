@@ -93,7 +93,6 @@ class RoomListener extends EventEmitter {
         this.roomList.delete(roomID)
       })
       tools.Log(`已连接到数据库中的 ${roomList.length} 个房间`)
-      this._EmitRoomList()
     }
   }
   /**
@@ -134,7 +133,6 @@ class RoomListener extends EventEmitter {
       this.liveRoomList.delete(roomID)
     })
     tools.Log(`已连接到 ${liveNumber} 个开播房间`)
-    this._EmitRoomList()
   }
   /**
    * 重设监听
@@ -162,17 +160,6 @@ class RoomListener extends EventEmitter {
       this.liveRoomList.delete(roomID)
     })
     await this.Start()
-  }
-  /**
-   * emit房间列表
-   *
-   * @memberof RoomListener
-   */
-  private async _EmitRoomList() {
-    let roomList: Set<number> = new Set()
-    for (let roomID of this.roomList.keys()) roomList.add(roomID)
-    for (let roomID of this.liveRoomList.keys()) roomList.add(roomID)
-    this.emit('roomList', roomList)
   }
   /**
    * 添加直播房间
