@@ -68,8 +68,14 @@ class Listener extends EventEmitter {
   private _ListenStartTime: number = Date.now()
   // 已连接房间列表
   private roomList: Set<number> = new Set()
-  // SYSMSG/GIFT 房间号缓存，防止重复抽奖
-  private roomIDCache: Set<number> = new Set()
+  /**
+   * 消息缓存
+   *
+   * @private
+   * @type {Set<string>}
+   * @memberof Listener
+   */
+  public _MSGCache: Set<string> = new Set()
   /**
    * 开始监听
    *
@@ -91,7 +97,6 @@ class Listener extends EventEmitter {
       .Start()
     Options.on('dbTimeUpdate', () => this._RoomListener._AddDBRoom())
     Options.on('globalFlagUpdate', () => this._RoomListener._RefreshLiveRoomListener())
-    setInterval(() => this.roomIDCache.clear(), 10 * 1000)
   }
   /**
    * 清空每日ID缓存
@@ -107,7 +112,9 @@ class Listener extends EventEmitter {
   /**
    * 计算遗漏数量
    *
-   * @param {Set<number>, Set<number>} 
+   * @private
+   * @param {Set<number>} Set1
+   * @param {Set<number>} Set2
    * @memberof Listener
    */
   private getMisses(Set1: Set<number>, Set2: Set<number>) {
@@ -129,8 +136,8 @@ class Listener extends EventEmitter {
   }
   /**
    * 监听数据Log
-   * 
-   * @param {number}
+   *
+   * @param {number} int
    * @memberof Listener
    */
   public logAllID(int: number) {
@@ -180,8 +187,8 @@ class Listener extends EventEmitter {
    */
   private _SYSMSGHandler(dataJson: SYS_MSG) {
     if (this.roomList.has(dataJson.real_roomid)) return
-    if (dataJson.real_roomid === undefined || this.roomIDCache.has(dataJson.real_roomid)) return
-    this.roomIDCache.add(dataJson.real_roomid)
+    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
+    this._MSGCache.add(dataJson.msg_text)
     const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
     const roomID = +dataJson.real_roomid
     this._RaffleCheck(url, roomID)
@@ -195,8 +202,8 @@ class Listener extends EventEmitter {
    */
   private _SYSGiftHandler(dataJson: SYS_GIFT) {
     if (this.roomList.has(dataJson.real_roomid)) return
-    if (dataJson.real_roomid === undefined || this.roomIDCache.has(dataJson.real_roomid)) return
-    this.roomIDCache.add(dataJson.real_roomid)
+    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
+    this._MSGCache.add(dataJson.msg_text)
     const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname
     const roomID = +dataJson.real_roomid
     this._RaffleCheck(url, roomID)
