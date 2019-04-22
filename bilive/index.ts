@@ -42,7 +42,6 @@ class BiLive {
     const cstMin = cst.getUTCMinutes()
     if (cstMin === 59) this._Listener.logAllID(cstHour + 1)
     if (cstString === '00:00') this._Listener.clearAllID()
-    this._Listener._MSGCache.clear()
   }
   /**
    * 监听系统消息

@@ -51,14 +51,6 @@ class Listener extends EventEmitter {
   private _beatStormID: Set<number> = new Set()
   private _dailyBeatStormID: Set<number> = new Set()
   /**
-   * 消息缓存
-   *
-   * @private
-   * @type {Set<string>}
-   * @memberof Listener
-   */
-  public _MSGCache: Set<string> = new Set()
-  /**
    * 房间监听
    *
    * @private
@@ -74,11 +66,10 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _ListenStartTime: number = Date.now()
-  // 全局计时器
-  private _lastTime = ''
-  public loop!: NodeJS.Timer
   // 已连接房间列表
   private roomList: Set<number> = new Set()
+  // SYSMSG/GIFT 房间号缓存，防止重复抽奖
+  private roomIDCache: Set<number> = new Set()
   /**
    * 开始监听
    *
@@ -100,24 +91,7 @@ class Listener extends EventEmitter {
       .Start()
     Options.on('dbTimeUpdate', () => this._RoomListener._AddDBRoom())
     Options.on('globalFlagUpdate', () => this._RoomListener._RefreshLiveRoomListener())
-    this.loop = setInterval(() => this._loop(), 55 * 1000)
-  }
-  /**
-   * 计时器
-   *
-   * @private
-   * @memberof BiLive
-   */
-  private _loop() {
-    const csttime = Date.now() + 8 * 60 * 60 * 1000
-    const cst = new Date(csttime)
-    const cstString = cst.toUTCString().substr(17, 5) // 'HH:mm'
-    if (cstString === this._lastTime) return
-    this._lastTime = cstString
-    const cstHour = cst.getUTCHours()
-    const cstMin = cst.getUTCMinutes()
-    if (cstMin === 59) this.logAllID(cstHour + 1)
-    if (cstString === '00:00') this.clearAllID()
+    setInterval(() => this.roomIDCache.clear(), 10 * 1000)
   }
   /**
    * 清空每日ID缓存
@@ -206,8 +180,8 @@ class Listener extends EventEmitter {
    */
   private _SYSMSGHandler(dataJson: SYS_MSG) {
     if (this.roomList.has(dataJson.real_roomid)) return
-    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
-    this._MSGCache.add(dataJson.msg_text)
+    if (dataJson.real_roomid === undefined || this.roomIDCache.has(dataJson.real_roomid)) return
+    this.roomIDCache.add(dataJson.real_roomid)
     const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
     const roomID = +dataJson.real_roomid
     this._RaffleCheck(url, roomID)
@@ -221,8 +195,8 @@ class Listener extends EventEmitter {
    */
   private _SYSGiftHandler(dataJson: SYS_GIFT) {
     if (this.roomList.has(dataJson.real_roomid)) return
-    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
-    this._MSGCache.add(dataJson.msg_text)
+    if (dataJson.real_roomid === undefined || this.roomIDCache.has(dataJson.real_roomid)) return
+    this.roomIDCache.add(dataJson.real_roomid)
     const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname
     const roomID = +dataJson.real_roomid
     this._RaffleCheck(url, roomID)
