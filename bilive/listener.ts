@@ -117,9 +117,8 @@ class Listener extends EventEmitter {
   private getMisses(Set1: Set<number>, Set2: Set<number>) {
     let query1 = [...Set1]
     let query2 = [...Set2]
-    if (query2.length > 0 && query2[0].toString().length > 6) { // For beatStorm IDs
+    if (query2.length > 0 && query2[0].toString().length > 6) // For beatStorm IDs
       for (let i = 0; i < query2.length; i++) query2[i] = Number(query2[i].toString().slice(0, -6))
-    }
     let query = query1.concat(query2).sort(function(a, b){return a - b})
     let Start: number = 0
     let End: number = 0
@@ -153,6 +152,7 @@ class Listener extends EventEmitter {
     let logMsg: string = '\n'
     logMsg += `/********************************* bilive_server 运行信息 *********************************/\n`
     logMsg += `本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
+    logMsg += `已监听房间数：${this._RoomListener.roomListSize()}\n`
     logMsg += `共监听到小电视抽奖数：${this._smallTVID.size}(${this._dailySmallTVID.size})\n`
     logMsg += `共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
     logMsg += `共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
@@ -165,6 +165,7 @@ class Listener extends EventEmitter {
     let pushMsg: string = ''
     pushMsg += `# bilive_server 监听情况报告\n`
     pushMsg += `- 本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
+    pushMsg += `- 已监听房间数：${this._RoomListener.roomListSize()}\n`
     pushMsg += `- 共监听到小电视抽奖数：${this._smallTVID.size}(${this._dailySmallTVID.size})\n`
     pushMsg += `- 共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
     pushMsg += `- 共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`

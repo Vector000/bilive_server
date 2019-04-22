@@ -218,6 +218,14 @@ class RoomListener extends EventEmitter {
     this.liveRoomList.set(roomID, commentClient)
   }
   /**
+   * 返回房间数
+   *
+   * @memberof RoomListener
+   */
+  public async roomListSize() {
+    return (this.roomList.size + this.liveRoomList.size)
+  }
+  /**
    * 监听抽奖
    *
    * @private
