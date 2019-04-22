@@ -64,7 +64,7 @@ class myDB {
   }
 }
 
-const dbPath = __dirname + (process.env.npm_package_scripts_start === 'node build/app.js' ? '/../..' : '/..') + '/options'
+const dbPath = __dirname + '/../../options'
 const db = { roomList: new myDB(dbPath + '/roomList.db') }
 
 export default db

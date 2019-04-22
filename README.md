@@ -1,5 +1,10 @@
 # bilive_server
 
+[![Node.js](https://img.shields.io/badge/Node.js-v10.0%2B-green.svg)](https://nodejs.org)
+[![Commitizen friendly](https://img.shields.io/badge/Commitizen-Friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+![GitHub repo size](https://img.shields.io/github/repo-size/Vector000/bilive_server.svg)
+[![MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Vector000/bilive_server/blob/2.1.0-beta/LICENSE)
+
 * 这是一个次分支，感谢所有对[主分支](https://github.com/lzghzr/bilive_client)做出贡献的人及其他同类开源软件的开发者
 * 有兴趣支持原作者的，请朝这里打钱=>[给lzghzr打钱](https://github.com/lzghzr/bilive_client/wiki)
 * 有兴趣向我投喂的，请朝这里打钱=>[请给我钱](https://github.com/Vector000/Something_Serious/blob/master/pics/mm_reward_qrcode.png)

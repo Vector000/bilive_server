@@ -19,6 +19,7 @@
     "@types/nodemailer": "^4.6.5",
     "@types/request": "^2.48.0",
     "@types/ws": "^6.0.1",
+    "cz-conventional-changelog": "^2.1.0",
     "npm-run-posix-or-windows": "^2.0.2",
     "rimraf": "^2.6.2",
     "typescript": "^3.1.6"
@@ -28,5 +29,10 @@
     "nodemailer": "^4.6.8",
     "request": "^2.88.0",
     "ws": "^6.1.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
