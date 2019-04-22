@@ -2,7 +2,6 @@ import { Options as requestOptions } from 'request'
 import { EventEmitter } from 'events'
 import tools from './lib/tools'
 import AppClient from './lib/app_client'
-import DMclient from './dm_client_re'
 import RoomListener from './roomlistener'
 import Options from './options'
 /**
@@ -15,14 +14,6 @@ class Listener extends EventEmitter {
   constructor() {
     super()
   }
-  /**
-   * 多分区监听，用于接收弹幕消息
-   *
-   * @private
-   * @type {Map<number, DMclient>}
-   * @memberof Listener
-   */
-  private _DMclient: Map<number, DMclient> = new Map()
   /**
    * 小电视ID
    *
@@ -66,7 +57,7 @@ class Listener extends EventEmitter {
    * @type {Set<string>}
    * @memberof Listener
    */
-  private _MSGCache: Set<string> = new Set()
+  public _MSGCache: Set<string> = new Set()
   /**
    * 房间监听
    *
@@ -86,16 +77,19 @@ class Listener extends EventEmitter {
   // 全局计时器
   private _lastTime = ''
   public loop!: NodeJS.Timer
+  // 已连接房间列表
+  private roomList: Set<number> = new Set()
   /**
    * 开始监听
    *
    * @memberof Listener
    */
   public Start() {
-    this.updateAreaRoom()
-    setInterval(() => this.updateAreaRoom(), 5 * 60 * 1000)
     this._RoomListener = new RoomListener()
     this._RoomListener
+      .on('roomList', (roomList: Set<number>) => this.roomList = roomList)
+      .on('SYS_MSG', dataJson => this._SYSMSGHandler(dataJson))
+      .on('SYS_GIFT', dataJson => this._SYSGiftHandler(dataJson))
       .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('raffle', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('lottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
@@ -130,7 +124,7 @@ class Listener extends EventEmitter {
    *
    * @memberof Listener
    */
-  private clearAllID() {
+  public clearAllID() {
     this._dailyBeatStormID.clear()
     this._dailySmallTVID.clear()
     this._dailyRaffleID.clear()
@@ -165,11 +159,19 @@ class Listener extends EventEmitter {
    * @param {number}
    * @memberof Listener
    */
-  private async logAllID(int: number) {
-    let raffleMisses = this.getMisses(this._smallTVID, this._raffleID)
-    let lotteryMisses = this.getMisses(this._lotteryID, this._beatStormID)
-    let dailyRaffleMisses = this.getMisses(this._dailySmallTVID, this._dailyRaffleID)
-    let dailyLotteryMisses = this.getMisses(this._dailyLotteryID, this._dailyBeatStormID)
+  public logAllID(int: number) {
+    const raffleMiss = this.getMisses(this._smallTVID, this._raffleID)
+    const lotteryMiss = this.getMisses(this._lotteryID, this._beatStormID)
+    const dailyRaffleMiss = this.getMisses(this._dailySmallTVID, this._dailyRaffleID)
+    const dailyLotteryMiss = this.getMisses(this._dailyLotteryID, this._dailyBeatStormID)
+    const allRaffle = raffleMiss + this._smallTVID.size + this._raffleID.size
+    const allLottery = lotteryMiss + this._lotteryID.size + this._beatStormID.size
+    const dailyAllRaffle = dailyRaffleMiss + this._dailySmallTVID.size + this._dailyRaffleID.size
+    const dailyAllLottery = dailyLotteryMiss + this._dailyLotteryID.size + this._dailyBeatStormID.size
+    const raffleMissRate = 100 * raffleMiss / (allRaffle === 0 ? 1 : allRaffle)
+    const lotteryMissRate = 100 * lotteryMiss / (allLottery === 0 ? 1 : allLottery)
+    const dailyRaffleMissRate = 100 * dailyRaffleMiss / (dailyAllRaffle === 0 ? 1 : dailyAllRaffle)
+    const dailyLotteryMissRate = 100 * dailyLotteryMiss / (dailyAllLottery === 0 ? 1 : dailyAllLottery)
     let logMsg: string = '\n'
     logMsg += `/********************************* bilive_server 运行信息 *********************************/\n`
     logMsg += `本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
@@ -177,10 +179,10 @@ class Listener extends EventEmitter {
     logMsg += `共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
     logMsg += `共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
     logMsg += `共监听到节奏风暴抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
-    logMsg += `raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+this._smallTVID.size+this._raffleID.size)*100).toFixed(1)}%)\n`
-    logMsg += `lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
-    logMsg += `今日raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
-    logMsg += `今日lottery漏监听：${dailyLotteryMisses}(${(dailyLotteryMisses/(dailyLotteryMisses+this._dailyLotteryID.size+this._dailyBeatStormID.size)*100).toFixed(1)}%)\n`
+    logMsg += `raffle漏监听：${raffleMiss}(${raffleMissRate.toFixed(1)}%)\n`
+    logMsg += `lottery漏监听：${lotteryMiss}(${lotteryMissRate.toFixed(1)}%)\n`
+    logMsg += `今日raffle漏监听：${dailyRaffleMiss}(${dailyRaffleMissRate.toFixed(1)}%)\n`
+    logMsg += `今日lottery漏监听：${dailyLotteryMiss}(${dailyLotteryMissRate.toFixed(1)}%)\n`
     tools.Log(logMsg)
     let pushMsg: string = ''
     pushMsg += `# bilive_server 监听情况报告\n`
@@ -189,48 +191,11 @@ class Listener extends EventEmitter {
     pushMsg += `- 共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
     pushMsg += `- 共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
     pushMsg += `- 共监听到节奏风暴抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
-    pushMsg += `- raffle漏监听：${raffleMisses}(${(raffleMisses/(raffleMisses+this._smallTVID.size+this._raffleID.size)*100).toFixed(1)}%)\n`
-    pushMsg += `- lottery漏监听：${lotteryMisses}(${(lotteryMisses/(lotteryMisses+this._lotteryID.size+this._beatStormID.size)*100).toFixed(1)}%)\n`
-    pushMsg += `- 今日raffle漏监听：${dailyRaffleMisses}(${(dailyRaffleMisses/(dailyRaffleMisses+this._dailySmallTVID.size+this._dailyRaffleID.size)*100).toFixed(1)}%)\n`
-    pushMsg += `- 今日lottery漏监听：${dailyLotteryMisses}(${(dailyLotteryMisses/(dailyLotteryMisses+this._dailyLotteryID.size+this._dailyBeatStormID.size)*100).toFixed(1)}%)\n`
+    pushMsg += `- raffle漏监听：${raffleMiss}(${raffleMissRate.toFixed(1)}%)\n`
+    pushMsg += `- lottery漏监听：${lotteryMiss}(${lotteryMissRate.toFixed(1)}%)\n`
+    pushMsg += `- 今日raffle漏监听：${dailyRaffleMiss}(${dailyRaffleMissRate.toFixed(1)}%)\n`
+    pushMsg += `- 今日lottery漏监听：${dailyLotteryMiss}(${dailyLotteryMissRate.toFixed(1)}%)\n`
     if (int % 8 === 0) tools.sendSCMSG(pushMsg)
-  }
-  /**
-   * 更新分区房间
-   *
-   * @memberof Listener
-   */
-  public async updateAreaRoom() {
-    // 获取直播列表
-    const getAllList = await tools.XHR<getAllList>({
-      uri: `${Options._.config.apiLiveOrigin}/room/v2/AppIndex/getAllList?${AppClient.baseQuery}`,
-      json: true
-    }, 'Android')
-    if (getAllList !== undefined && getAllList.response.statusCode === 200 && getAllList.body.code === 0) {
-      const roomIDs: Set<number> = new Set()
-      // 获取房间列表
-      getAllList.body.data.module_list.forEach(modules => {
-        if (modules.module_info.type === 9 && modules.list.length > 2) {
-          for (let i = 0; i < modules.list.length; i++) roomIDs.add((<getAllListDataRoomList>modules.list[i]).roomid)
-        }
-      })
-      // 添加房间
-      roomIDs.forEach(roomID => {
-        if (this._DMclient.has(roomID)) return
-        const newDMclient = new DMclient({ roomID })
-        newDMclient
-          .on('SYS_MSG', dataJson => this._SYSMSGHandler(dataJson))
-          .on('SYS_GIFT', dataJson => this._SYSGiftHandler(dataJson))
-          .Connect()
-        this._DMclient.set(roomID, newDMclient)
-      })
-      // 移除房间
-      this._DMclient.forEach((roomDM, roomID) => {
-        if (roomIDs.has(roomID)) return
-        roomDM.removeAllListeners().Close()
-        this._DMclient.delete(roomID)
-      })
-    }
   }
   /**
    * 监听弹幕系统消息
@@ -240,6 +205,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _SYSMSGHandler(dataJson: SYS_MSG) {
+    if (this.roomList.has(dataJson.real_roomid)) return
     if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
     this._MSGCache.add(dataJson.msg_text)
     const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
@@ -254,6 +220,7 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   private _SYSGiftHandler(dataJson: SYS_GIFT) {
+    if (this.roomList.has(dataJson.real_roomid)) return
     if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
     this._MSGCache.add(dataJson.msg_text)
     const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname

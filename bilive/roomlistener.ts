@@ -93,6 +93,7 @@ class RoomListener extends EventEmitter {
         this.roomList.delete(roomID)
       })
       tools.Log(`已连接到数据库中的 ${roomList.length} 个房间`)
+      this._EmitRoomList()
     }
   }
   /**
@@ -133,6 +134,7 @@ class RoomListener extends EventEmitter {
       this.liveRoomList.delete(roomID)
     })
     tools.Log(`已连接到 ${liveNumber} 个开播房间`)
+    this._EmitRoomList()
   }
   /**
    * 重设监听
@@ -162,6 +164,17 @@ class RoomListener extends EventEmitter {
     await this.Start()
   }
   /**
+   * emit房间列表
+   *
+   * @memberof RoomListener
+   */
+  private async _EmitRoomList() {
+    let roomList: Set<number> = new Set()
+    for (let roomID of this.roomList.keys()) roomList.add(roomID)
+    for (let roomID of this.liveRoomList.keys()) roomList.add(roomID)
+    this.emit('roomList', roomList)
+  }
+  /**
    * 添加直播房间
    *
    * @param {number} roomID
@@ -173,6 +186,8 @@ class RoomListener extends EventEmitter {
     if (userID === 0) userID = await this._getMasterID(roomID)
     const commentClient = new DMclient({ roomID, userID, protocol: 'flash' })
     commentClient
+      .on('SYS_MSG', dataJson => this.emit('SYS_MSG', dataJson))
+      .on('SYS_GIFT', dataJson => this.emit('SYS_GIFT', dataJson))
       .on('TV_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('RAFFLE_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
@@ -180,7 +195,8 @@ class RoomListener extends EventEmitter {
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
       .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
-        if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
+        if (!Options._.config.excludeCMD.includes(dataJson.cmd))
+          tools.Log(JSON.stringify(dataJson))
       })
       .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
@@ -198,12 +214,17 @@ class RoomListener extends EventEmitter {
     if (userID === 0) userID = await this._getMasterID(roomID)
     const commentClient = new DMclient({ roomID, userID, protocol: 'flash' })
     commentClient
+      .on('SYS_MSG', dataJson => this.emit('SYS_MSG', dataJson))
+      .on('SYS_GIFT', dataJson => this.emit('SYS_GIFT', dataJson))
+      .on('TV_START', dataJson => this._RaffleStartHandler(dataJson))
+      .on('RAFFLE_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, '2'))
       .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
-        if (!Options._.config.excludeCMD.includes(dataJson.cmd)) tools.Log(JSON.stringify(dataJson))
+        if (!Options._.config.excludeCMD.includes(dataJson.cmd))
+          tools.Log(JSON.stringify(dataJson))
       })
       .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
