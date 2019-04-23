@@ -222,7 +222,7 @@ class RoomListener extends EventEmitter {
    *
    * @memberof RoomListener
    */
-  public async roomListSize() {
+  public roomListSize() {
     return (this.roomList.size + this.liveRoomList.size)
   }
   /**
