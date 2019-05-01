@@ -44,7 +44,9 @@ class RoomListener extends EventEmitter {
         this._AddLiveRoom()
         this._LiveRoomRefreshTimer = setInterval(() => this._AddLiveRoom(), 5 * 60 * 1000)
       }
-      this._DMErrorTimer = setInterval(() => this._ResetRoom(), 60 * 1000)
+      this._DMErrorTimer = setInterval(() => {
+        if (this._DMErrorCount > 300) this._ResetRoom()
+      }, 60 * 1000)
     }
     else tools.ErrorLog(load)
   }
@@ -140,10 +142,7 @@ class RoomListener extends EventEmitter {
    * @memberof RoomListener
    */
   private async _ResetRoom() {
-    if (this._DMErrorCount < 300) {
-      this._DMErrorCount = 0
-      return
-    }
+    this._DMErrorCount = 0
     clearInterval(this._DMErrorTimer)
     clearInterval(this._DBRoomRefreshTimer)
     clearInterval(this._LiveRoomRefreshTimer)
