@@ -11226,11 +11226,7 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"_id":"AeKNGZrzK9j7Am4M","roomID":12124934,"smallTV":90,"raffle":159,"beatStorm":129,"masterID":348918213,"updateTime":1557689836273,"lottery":133}
-{"roomID":3269965,"smallTV":43,"masterID":27358353,"updateTime":1557690187199,"_id":"Kr49AqybfnXdAicM","lottery":169,"beatStorm":78,"raffle":123}
-{"_id":"AeKNGZrzK9j7Am4M","roomID":12124934,"smallTV":90,"raffle":160,"beatStorm":129,"masterID":348918213,"updateTime":1557690336668,"lottery":133}
-{"_id":"AeKNGZrzK9j7Am4M","roomID":12124934,"smallTV":90,"raffle":161,"beatStorm":129,"masterID":348918213,"updateTime":1557690338285,"lottery":133}
-{"_id":"AeKNGZrzK9j7Am4M","roomID":12124934,"smallTV":90,"raffle":161,"beatStorm":130,"masterID":348918213,"updateTime":1557690596002,"lottery":133}
-{"roomID":1588264,"raffle":28,"masterID":16029978,"updateTime":1557690892307,"_id":"MtM95N5Z41sarftM","lottery":17,"beatStorm":19}
-{"_id":"9flWZUYUUuUwy6pY","roomID":8777632,"smallTV":49,"beatStorm":145,"raffle":90,"masterID":285222712,"updateTime":1557691135369,"lottery":137}
-{"_id":"cKxGJuw3Z5Xlp7mm","roomID":1026111,"raffle":46,"masterID":37546701,"beatStorm":131,"smallTV":11,"updateTime":1557691138865,"lottery":94}
+{"roomID":556288,"smallTV":16,"masterID":15405355,"updateTime":1557776379054,"_id":"5p3PMD6mindR5YDn","beatStorm":114,"lottery":162,"raffle":38}
+{"_id":"so0uWX20nLydaCg2","roomID":128308,"smallTV":18,"masterID":941228,"raffle":79,"beatStorm":127,"updateTime":1557776502337,"lottery":125}
+{"roomID":1156796,"raffle":1,"masterID":12897567,"updateTime":1557776673926,"_id":"i3OLCycAImf7AP70","lottery":2,"beatStorm":1}
+{"_id":"so0uWX20nLydaCg2","roomID":128308,"smallTV":18,"masterID":941228,"raffle":80,"beatStorm":127,"updateTime":1557777024735,"lottery":125}
