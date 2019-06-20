@@ -2,6 +2,7 @@ import db from './db'
 import tools from './lib/tools'
 import DMclient from './dm_client_re'
 import Options from './options'
+import DanmuLib from './danmuLog'
 import { EventEmitter } from 'events'
 import { Options as requestOptions } from 'request'
 
@@ -181,8 +182,10 @@ class RoomListener extends EventEmitter {
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
       .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
-        if (!Options._.config.excludeCMD.includes(dataJson.cmd))
+        if (!Options._.config.excludeCMD.includes(dataJson.cmd)) {
           tools.Log(JSON.stringify(dataJson))
+        }
+        DanmuLib.add(dataJson)
       })
       .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
@@ -209,8 +212,10 @@ class RoomListener extends EventEmitter {
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, '2'))
       .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
-        if (!Options._.config.excludeCMD.includes(dataJson.cmd))
+        if (!Options._.config.excludeCMD.includes(dataJson.cmd)) {
           tools.Log(JSON.stringify(dataJson))
+        }
+        DanmuLib.add(dataJson)
       })
       .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
