@@ -11,9 +11,9 @@ const FSwriteFile = util.promisify(fs.writeFile)
 class DanmuLib extends EventEmitter {
   constructor() {
     super()
-    this._danmuLibPath = __dirname + '../../options/danmuLib.json'
+    this._danmuLibPath = __dirname + '/../../options/danmuLib.json'
     const hasFile = fs.existsSync(this._danmuLibPath)
-    if (!hasFile) {
+    if (hasFile) {
       const danmuLibBuffer = fs.readFileSync(this._danmuLibPath)
       const danmuLib = <danmuLib>JSON.parse(danmuLibBuffer.toString())
       if (danmuLib === undefined) throw new TypeError('文件格式化失败')
@@ -25,7 +25,7 @@ class DanmuLib extends EventEmitter {
   public async add(item: any) {
     const cmd = item['cmd']
     if (this._[cmd] === undefined) {
-      this._['cmd'] = item
+      this._[cmd] = item
       await this.save()
     }
   }
