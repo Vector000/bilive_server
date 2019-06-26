@@ -1,5 +1,6 @@
 import WSServer from './wsserver'
 import Listener from './listener'
+import Options from './options'
 
 /**
  * 主程序
@@ -40,6 +41,7 @@ class BiLive {
     this._lastTime = cstString
     const cstHour = cst.getUTCHours()
     const cstMin = cst.getUTCMinutes()
+    if (cstMin === 0) Options.save()
     if (cstMin === 59) this._Listener.logAllID(cstHour + 1)
     if (cstString === '00:00') {
       this._Listener.clearAllID()
