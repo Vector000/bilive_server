@@ -54,9 +54,9 @@ class BiLive {
   public Listener() {
     this._Listener = new Listener()
     this._Listener
-      .on('smallTV', raffleMessage => this._WSServer.SmallTV(raffleMessage))
       .on('raffle', raffleMessage => this._WSServer.Raffle(raffleMessage))
       .on('lottery', lotteryMessage => this._WSServer.Lottery(lotteryMessage))
+      .on('pklottery', lotteryMessage => this._WSServer.PKLottery(lotteryMessage))
       .on('beatStorm', beatStormMessage => this._WSServer.BeatStorm(beatStormMessage))
       .Start()
   }

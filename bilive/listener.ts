@@ -50,6 +50,7 @@ class Listener extends EventEmitter {
    */
   private _beatStormID: Set<number> = new Set()
   private _dailyBeatStormID: Set<number> = new Set()
+  private _pklotteryID: Set<number> = new Set()
   /**
    * 房间监听
    *
@@ -82,14 +83,15 @@ class Listener extends EventEmitter {
   public Start() {
     this._RoomListener = new RoomListener()
     this._RoomListener
-      .on('SYS_MSG', dataJson => this._SYSMSGHandler(dataJson))
-      .on('SYS_GIFT', dataJson => this._SYSGiftHandler(dataJson))
+      .on('SYS_MSG', dataJson => this._RaffleCheck(dataJson))
+      .on('SYS_GIFT', dataJson => this._RaffleCheck(dataJson))
       .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('raffle', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('lottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
+      .on('pklottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
       .on('beatStorm', (beatStormMessage: beatStormMessage) => this._RaffleHandler(beatStormMessage))
-      .on('box', (boxMessage: boxMessage) => this._RaffleHandler(boxMessage))
       .on('lottery2', (lotteryMessage: lotteryMessage) => this._RaffleHandler2(lotteryMessage))
+      .on('pklottery2', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
       .on('beatStorm2', (beatStormMessage: beatStormMessage) => this._RaffleHandler2(beatStormMessage))
       .Start()
     Options.on('dbTimeUpdate', () => this._RoomListener._AddDBRoom())
@@ -177,59 +179,33 @@ class Listener extends EventEmitter {
     if (int % 8 === 0) tools.sendSCMSG(pushMsg)
   }
   /**
-   * 监听弹幕系统消息
-   *
-   * @private
-   * @param {SYS_MSG} dataJson
-   * @memberof Listener
-   */
-  private _SYSMSGHandler(dataJson: SYS_MSG) {
-    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
-    this._MSGCache.add(dataJson.msg_text)
-    const url = Options._.config.apiLiveOrigin + Options._.config.smallTVPathname
-    const roomID = +dataJson.real_roomid
-    this._RaffleCheck(url, roomID)
-  }
-  /**
-   * 监听系统礼物消息
-   *
-   * @private
-   * @param {SYS_GIFT} dataJson
-   * @memberof Listener
-   */
-  private _SYSGiftHandler(dataJson: SYS_GIFT) {
-    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
-    this._MSGCache.add(dataJson.msg_text)
-    const url = Options._.config.apiLiveOrigin + Options._.config.rafflePathname
-    const roomID = +dataJson.real_roomid
-    this._RaffleCheck(url, roomID)
-  }
-  /**
    * 检查房间抽奖raffle信息
    *
    * @private
-   * @param {string} url
-   * @param {number} roomID
+   * @param {(SYS_MSG | SYS_GIFT)} dataJson
    * @memberof Listener
    */
-  private async _RaffleCheck(url: string, roomID: number) {
+  private async _RaffleCheck(dataJson: SYS_MSG | SYS_GIFT) {
+    if (dataJson.real_roomid === undefined || this._MSGCache.has(dataJson.msg_text)) return
+    this._MSGCache.add(dataJson.msg_text)
+    const roomID = dataJson.real_roomid
     // 等待3s, 防止土豪刷屏
     await tools.Sleep(3000)
-    const check: requestOptions = {
-      uri: `${url}/check?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
+    const _lotteryInfo: requestOptions = {
+      uri: `${Options._.config.apiLiveOrigin}/xlive/lottery-interface/v1/lottery/getLotteryInfo?${AppClient.signQueryBase(`roomid=${roomID}`)}`,
       json: true
     }
-    const raffleCheck = await tools.XHR<raffleCheck>(check, 'Android')
-    if (raffleCheck !== undefined && raffleCheck.response.statusCode === 200
-      && raffleCheck.body.code === 0 && raffleCheck.body.data.list.length > 0) {
-      raffleCheck.body.data.list.forEach(data => {
+    const lotteryInfo = await tools.XHR<lotteryInfo>(_lotteryInfo, 'Android')
+    if (lotteryInfo !== undefined && lotteryInfo.response.statusCode === 200
+      && lotteryInfo.body.code === 0 && lotteryInfo.body.data.gift_list.length > 0) {
+      lotteryInfo.body.data.gift_list.forEach(data => {
         const message: message = {
-          cmd: data.type === 'small_tv' ? 'smallTV' : 'raffle',
+          cmd: 'raffle',
           roomID,
           id: +data.raffleId,
           type: data.type,
           title: data.title,
-          time: +data.time,
+          time: +data.time_wait,
           max_time: +data.max_time,
           time_wait: +data.time_wait
         }
@@ -241,17 +217,12 @@ class Listener extends EventEmitter {
    * 监听抽奖消息
    *
    * @private
-   * @param {raffleMessage | lotteryMessage | beatStormMessage | boxMessage} raffleMessage
+   * @param {raffleMessage | lotteryMessage | beatStormMessage} raffleMessage
    * @memberof Listener
    */
-  private _RaffleHandler(raffleMessage: raffleMessage | lotteryMessage | beatStormMessage | boxMessage) {
+  private _RaffleHandler(raffleMessage: raffleMessage | lotteryMessage | beatStormMessage) {
     const { cmd, id, roomID } = raffleMessage
     switch (cmd) {
-      case 'smallTV':
-        if (this._smallTVID.has(id)) return
-        this._smallTVID.add(id)
-        this._dailySmallTVID.add(id)
-        break
       case 'raffle':
         if (this._raffleID.has(id)) return
         this._raffleID.add(id)
@@ -262,17 +233,20 @@ class Listener extends EventEmitter {
         this._lotteryID.add(id)
         this._dailyLotteryID.add(id)
         break
+      case 'pklottery':
+        if (this._pklotteryID.has(id)) return
+        this._pklotteryID.add(id)
+        break
       case 'beatStorm':
         if (this._beatStormID.has(id)) return
         this._beatStormID.add(id)
         this._dailyBeatStormID.add(id)
         break
-      case 'box': break
       default:
         return
     }
     this.emit(cmd, raffleMessage)
-    if (cmd !== 'box') this._RoomListener.AddRoom(roomID)
+    this._RoomListener.AddRoom(roomID)
     tools.Log(`房间 ${roomID} 开启了第 ${id} 轮${raffleMessage.title}`)
     this._RoomListener.UpdateDB(roomID, cmd)
   }
@@ -290,6 +264,10 @@ class Listener extends EventEmitter {
         if (this._lotteryID.has(id)) return
         this._lotteryID.add(id)
         this._dailyLotteryID.add(id)
+        break
+      case 'pklottery':
+        if (this._pklotteryID.has(id)) return
+        this._pklotteryID.add(id)
         break
       case 'beatStorm':
         if (this._beatStormID.has(id)) return

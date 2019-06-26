@@ -178,17 +178,18 @@ class RoomListener extends EventEmitter {
       .on('TV_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('RAFFLE_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
+      .on('PK_LOTTERY_START', dataJson => this._PKLotteryStartHandler(dataJson))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson))
-      .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) {
+          Options._.config.excludeCMD.push(dataJson.cmd)
           tools.Log(JSON.stringify(dataJson))
         }
         DanmuLib.add(dataJson)
       })
       .on('DMerror', () => this._DMErrorCount++)
-      .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
+      .Connect({ server: 'broadcastlv.chat.bilibili.com', port: 2243 })
     this.roomList.set(roomID, commentClient)
   }
   /**
@@ -208,17 +209,18 @@ class RoomListener extends EventEmitter {
       .on('TV_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('RAFFLE_START', dataJson => this._RaffleStartHandler(dataJson))
       .on('LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
+      .on('PK_LOTTERY_START', dataJson => this._PKLotteryStartHandler(dataJson, '2'))
       .on('GUARD_LOTTERY_START', dataJson => this._LotteryStartHandler(dataJson, '2'))
       .on('SPECIAL_GIFT', dataJson => this._SpecialGiftHandler(dataJson, '2'))
-      .on('BOX_ACTIVITY_START', dataJson => this._BoxLotteryHandler(dataJson))
       .on('ALL_MSG', dataJson => {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) {
+          Options._.config.excludeCMD.push(dataJson.cmd)
           tools.Log(JSON.stringify(dataJson))
         }
         DanmuLib.add(dataJson)
       })
       .on('DMerror', () => this._DMErrorCount++)
-      .Connect({ server: 'livecmt-2.bilibili.com', port: 2243 })
+      .Connect({ server: 'broadcastlv.chat.bilibili.com', port: 2243 })
     this.liveRoomList.set(roomID, commentClient)
   }
   /**
@@ -238,7 +240,7 @@ class RoomListener extends EventEmitter {
    */
   private _RaffleStartHandler(dataJson: RAFFLE_START) {
     if (dataJson.data === undefined || dataJson.data.raffleId === undefined) return
-    const cmd = dataJson.data.type === 'small_tv' ? 'smallTV' : 'raffle'
+    const cmd = 'raffle'
     const raffleMessage: raffleMessage = {
       cmd,
       roomID: dataJson._roomid,
@@ -272,6 +274,26 @@ class RoomListener extends EventEmitter {
     this.emit(`lottery${source}`, lotteryMessage)
   }
   /**
+   * 监听大乱斗抽奖
+   *
+   * @private
+   * @param {PK_LOTTERY_START} dataJson
+   * @param {null | 2} source
+   * @memberof RoomListener
+   */
+  private _PKLotteryStartHandler(dataJson: PK_LOTTERY_START, source: '' | '2' = '') {
+    if (dataJson.data === undefined || dataJson.data.id === undefined) return
+    const raffleMessage: lotteryMessage = {
+      cmd: 'pklottery',
+      roomID: dataJson._roomid,
+      id: +dataJson.data.id,
+      type: 'pk',
+      title: dataJson.data.title,
+      time: +dataJson.data.time
+    }
+    this.emit(`pklottery${source}`, raffleMessage)
+  }
+  /**
    * 监听特殊礼物消息
    *
    * @private
@@ -302,22 +324,6 @@ class RoomListener extends EventEmitter {
       time: Date.now()
     }
     this.emit(`beatStorm${source}`, beatStormMessage)
-  }
-  /**
-   * 监听快速抽奖
-   *
-   * @private
-   * @param {BOX_ACTIVITY_START} dataJson
-   * @memberof RoomListener
-   */
-  private _BoxLotteryHandler(dataJson: BOX_ACTIVITY_START) {
-    const boxMessage: boxMessage = {
-      cmd: 'box',
-      roomID: dataJson._roomid,
-      id: +dataJson.aid,
-      title: '宝箱抽奖',
-    }
-    this.emit('box', boxMessage)
   }
   /**
    * 写入数据库
