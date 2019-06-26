@@ -88,11 +88,6 @@
       "tip": "向该用户组下的所有用户发送广播",
       "type": "string"
     },
-    "smallTV": {
-      "description": "小电视抽奖",
-      "tip": "是否向该用户组发送小电视抽奖消息",
-      "type": "boolean"
-    },
     "raffle": {
       "description": "raffle类抽奖",
       "tip": "是否向该用户组发送raffle类抽奖消息, 例如活动抽奖",
@@ -101,6 +96,11 @@
     "lottery": {
       "description": "lottery类抽奖",
       "tip": "是否向该用户组发送lottery类抽奖消息, 例如舰队抽奖",
+      "type": "boolean"
+    },
+    "pklottery": {
+      "description": "pklottery类抽奖",
+      "tip": "是否向该用户组发送pklottery类抽奖消息, 如大乱斗抽奖",
       "type": "boolean"
     },
     "beatStorm": {

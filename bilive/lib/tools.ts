@@ -2,6 +2,7 @@ import util from 'util'
 import crypto from 'crypto'
 import request from 'request'
 import { EventEmitter } from 'events'
+import Options from '../options'
 /**
  * 一些工具, 供全局调用
  *
@@ -182,10 +183,19 @@ class Tools extends EventEmitter {
    * 为了兼容旧版
    *
    * @param {string} message
-   * @returns {void}
    * @memberof Tools
    */
-  public sendSCMSG!: (message: string) => void
+  public sendSCMSG(message: string) {
+    const adminServerChan = Options._.config.adminServerChan
+    if (adminServerChan !== '') {
+      const sendtoadmin: request.Options = {
+        method: 'POST',
+        uri: `https://sc.ftqq.com/${adminServerChan}.send`,
+        body: `text=bilive_client&desp=${message}`
+      }
+      this.XHR<serverChan>(sendtoadmin)
+    }
+  }
   /**
    * 异或加密
    *

@@ -185,8 +185,8 @@ class RoomListener extends EventEmitter {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) {
           Options._.config.excludeCMD.push(dataJson.cmd)
           tools.Log(JSON.stringify(dataJson))
+          DanmuLib.add(dataJson)
         }
-        DanmuLib.add(dataJson)
       })
       .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'broadcastlv.chat.bilibili.com', port: 2243 })
@@ -216,8 +216,8 @@ class RoomListener extends EventEmitter {
         if (!Options._.config.excludeCMD.includes(dataJson.cmd)) {
           Options._.config.excludeCMD.push(dataJson.cmd)
           tools.Log(JSON.stringify(dataJson))
+          DanmuLib.add(dataJson)
         }
-        DanmuLib.add(dataJson)
       })
       .on('DMerror', () => this._DMErrorCount++)
       .Connect({ server: 'broadcastlv.chat.bilibili.com', port: 2243 })
@@ -291,6 +291,7 @@ class RoomListener extends EventEmitter {
       title: dataJson.data.title,
       time: +dataJson.data.time
     }
+    tools.sendSCMSG(JSON.stringify(raffleMessage))
     this.emit(`pklottery${source}`, raffleMessage)
   }
   /**
