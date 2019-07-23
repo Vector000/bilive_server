@@ -113,7 +113,9 @@ class RoomListener extends EventEmitter {
     if (liveRooms === undefined || liveRooms.response.statusCode !== 200 || liveRooms.body.code !== 0) return
     const liveNumber = liveRooms.body.data.num
     let roomSet: Set<number> = new Set()
-    for (let i = 1; i <= Math.ceil(liveNumber / 500); i++) {
+    let connectNumber: number = liveNumber
+    if (Options._.config.globalListenNum > -1) connectNumber = Options._.config.globalListenNum
+    for (let i = 1; i <= Math.ceil(connectNumber / 500); i++) {
       let allRoom = await tools.XHR<allRooms>({
         uri: `https://api.live.bilibili.com/room/v1/Area/getListByAreaID?page=${i}&pageSize=500`,
         json: true
@@ -135,7 +137,7 @@ class RoomListener extends EventEmitter {
         .Close()
       this.liveRoomList.delete(roomID)
     })
-    tools.Log(`已连接到 ${liveNumber} 个开播房间`)
+    tools.Log(`已连接到 ${liveNumber} 个开播房间中的 ${connectNumber} 个`)
   }
   /**
    * 重设监听

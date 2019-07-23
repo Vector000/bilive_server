@@ -24,6 +24,7 @@ interface config {
   [index: string]: number | boolean | string | string[]
   dbTime: number
   globalListener: boolean
+  globalListenNum: number
   adminServerChan: string
   liveOrigin: string
   apiVCOrigin: string

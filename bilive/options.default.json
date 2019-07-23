@@ -10,6 +10,7 @@
     "dbTime": 30,
     "adminServerChan": "",
     "globalListener": false,
+    "globalListenNum": -1,
     "liveOrigin": "https://live.bilibili.com",
     "apiLiveOrigin": "https://api.live.bilibili.com",
     "apiVCOrigin": "https://api.vc.bilibili.com",
@@ -30,13 +31,18 @@
   "info": {
     "dbTime": {
       "description": "活跃房间时间",
-      "tip": "监听过去N天内的活跃房间",
+      "tip": "监听过去N天内的活跃房间，适用于数据库内房间监听",
       "type": "number"
     },
     "globalListener": {
       "description": "开播房间监听",
       "tip": "对所有开播房间进行监听，可能会导致网络问题，慎用",
       "type": "boolean"
+    },
+    "globalListenNum": {
+      "description": "监听开播房间数",
+      "tip": "默认为-1，表示对所有开播房间进行监听，只在开启全局监听时有效",
+      "type": "number"
     },
     "adminServerChan": {
       "description": "SCKEY",
