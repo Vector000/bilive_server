@@ -15,15 +15,6 @@ class Listener extends EventEmitter {
     super()
   }
   /**
-   * 小电视ID
-   *
-   * @private
-   * @type {Set<number>}
-   * @memberof Listener
-   */
-  private _smallTVID: Set<number> = new Set()
-  private _dailySmallTVID: Set<number> = new Set()
-  /**
    * 抽奖ID
    *
    * @private
@@ -85,7 +76,6 @@ class Listener extends EventEmitter {
     this._RoomListener
       .on('SYS_MSG', dataJson => this._RaffleCheck(dataJson))
       .on('SYS_GIFT', dataJson => this._RaffleCheck(dataJson))
-      .on('smallTV', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('raffle', (raffleMessage: raffleMessage) => this._RaffleHandler(raffleMessage))
       .on('lottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
       .on('pklottery', (lotteryMessage: lotteryMessage) => this._RaffleHandler(lotteryMessage))
@@ -104,7 +94,6 @@ class Listener extends EventEmitter {
    */
   public clearAllID() {
     this._dailyBeatStormID.clear()
-    this._dailySmallTVID.clear()
     this._dailyRaffleID.clear()
     this._dailyLotteryID.clear()
   }
@@ -116,9 +105,9 @@ class Listener extends EventEmitter {
    * @param {Set<number>} Set2
    * @memberof Listener
    */
-  private getMisses(Set1: Set<number>, Set2: Set<number>) {
+  private getMisses(Set1: Set<number>, Set2?: Set<number>) {
     let query1 = [...Set1]
-    let query2 = [...Set2]
+    let query2 = Set2 === undefined ? [] : [...Set2]
     if (query2.length > 0 && query2[0].toString().length > 6) // For beatStorm IDs
       for (let i = 0; i < query2.length; i++) query2[i] = Number(query2[i].toString().slice(0, -6))
     let query = query1.concat(query2).sort(function(a, b){return a - b})
@@ -139,13 +128,13 @@ class Listener extends EventEmitter {
    * @memberof Listener
    */
   public logAllID(int: number) {
-    const raffleMiss = this.getMisses(this._smallTVID, this._raffleID)
+    const raffleMiss = this.getMisses(this._raffleID)
     const lotteryMiss = this.getMisses(this._lotteryID, this._beatStormID)
-    const dailyRaffleMiss = this.getMisses(this._dailySmallTVID, this._dailyRaffleID)
+    const dailyRaffleMiss = this.getMisses(this._dailyRaffleID)
     const dailyLotteryMiss = this.getMisses(this._dailyLotteryID, this._dailyBeatStormID)
-    const allRaffle = raffleMiss + this._smallTVID.size + this._raffleID.size
+    const allRaffle = raffleMiss + this._raffleID.size
     const allLottery = lotteryMiss + this._lotteryID.size + this._beatStormID.size
-    const dailyAllRaffle = dailyRaffleMiss + this._dailySmallTVID.size + this._dailyRaffleID.size
+    const dailyAllRaffle = dailyRaffleMiss + this._dailyRaffleID.size
     const dailyAllLottery = dailyLotteryMiss + this._dailyLotteryID.size + this._dailyBeatStormID.size
     const raffleMissRate = 100 * raffleMiss / (allRaffle === 0 ? 1 : allRaffle)
     const lotteryMissRate = 100 * lotteryMiss / (allLottery === 0 ? 1 : allLottery)
@@ -155,10 +144,9 @@ class Listener extends EventEmitter {
     logMsg += `/********************************* bilive_server 运行信息 *********************************/\n`
     logMsg += `本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
     logMsg += `已监听房间数：${this._RoomListener.roomListSize()}\n`
-    logMsg += `共监听到小电视抽奖数：${this._smallTVID.size}(${this._dailySmallTVID.size})\n`
-    logMsg += `共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
-    logMsg += `共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
-    logMsg += `共监听到节奏风暴抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
+    logMsg += `共监听到raffle抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
+    logMsg += `共监听到lottery抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
+    logMsg += `共监听到beatStorm抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
     logMsg += `raffle漏监听：${raffleMiss}(${raffleMissRate.toFixed(1)}%)\n`
     logMsg += `lottery漏监听：${lotteryMiss}(${lotteryMissRate.toFixed(1)}%)\n`
     logMsg += `今日raffle漏监听：${dailyRaffleMiss}(${dailyRaffleMissRate.toFixed(1)}%)\n`
@@ -168,10 +156,9 @@ class Listener extends EventEmitter {
     pushMsg += `# bilive_server 监听情况报告\n`
     pushMsg += `- 本次监听开始于：${new Date(this._ListenStartTime).toString()}\n`
     pushMsg += `- 已监听房间数：${this._RoomListener.roomListSize()}\n`
-    pushMsg += `- 共监听到小电视抽奖数：${this._smallTVID.size}(${this._dailySmallTVID.size})\n`
-    pushMsg += `- 共监听到活动抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
-    pushMsg += `- 共监听到大航海抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
-    pushMsg += `- 共监听到节奏风暴抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
+    pushMsg += `- 共监听到raffle抽奖数：${this._raffleID.size}(${this._dailyRaffleID.size})\n`
+    pushMsg += `- 共监听到lottery抽奖数：${this._lotteryID.size}(${this._dailyLotteryID.size})\n`
+    pushMsg += `- 共监听到beatStorm抽奖数：${this._beatStormID.size}(${this._dailyBeatStormID.size})\n`
     pushMsg += `- raffle漏监听：${raffleMiss}(${raffleMissRate.toFixed(1)}%)\n`
     pushMsg += `- lottery漏监听：${lotteryMiss}(${lotteryMissRate.toFixed(1)}%)\n`
     pushMsg += `- 今日raffle漏监听：${dailyRaffleMiss}(${dailyRaffleMissRate.toFixed(1)}%)\n`
