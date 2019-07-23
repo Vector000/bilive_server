@@ -290,7 +290,7 @@ class RoomListener extends EventEmitter {
       roomID: dataJson._roomid,
       id: +dataJson.data.id,
       type: 'pk',
-      title: dataJson.data.title,
+      title: '大乱斗抽奖',
       time: +dataJson.data.time
     }
     //tools.sendSCMSG(JSON.stringify(raffleMessage))
