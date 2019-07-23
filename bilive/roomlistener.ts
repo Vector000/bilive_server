@@ -291,7 +291,7 @@ class RoomListener extends EventEmitter {
       title: dataJson.data.title,
       time: +dataJson.data.time
     }
-    tools.sendSCMSG(JSON.stringify(raffleMessage))
+    //tools.sendSCMSG(JSON.stringify(raffleMessage))
     this.emit(`pklottery${source}`, raffleMessage)
   }
   /**
