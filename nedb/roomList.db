@@ -11966,9 +11966,10 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"roomID":449952,"raffle":1,"masterID":24310372,"updateTime":1563911435813,"_id":"MF6lx6LIbp0nGH7z","lottery":3,"pklottery":6}
-{"_id":"0o9BRh3TfVMW0pq8","roomID":2577655,"smallTV":157,"beatStorm":119,"raffle":146,"masterID":51531374,"updateTime":1563911553087,"lottery":91}
-{"_id":"kAM03s14HQL1wck0","roomID":3267741,"smallTV":26,"raffle":88,"beatStorm":153,"masterID":29377814,"updateTime":1563911648813,"lottery":232,"pklottery":8}
-{"roomID":21283379,"raffle":7,"masterID":164682633,"updateTime":1563911769242,"_id":"EeFB5XiaioufpSpl","beatStorm":23,"lottery":13}
-{"roomID":3061001,"pklottery":2,"masterID":39621793,"updateTime":1563911793820,"_id":"T1AgNbYNVArnjzlj"}
-{"_id":"0o9BRh3TfVMW0pq8","roomID":2577655,"smallTV":157,"beatStorm":119,"raffle":147,"masterID":51531374,"updateTime":1563911844453,"lottery":91}
+{"roomID":1079256,"pklottery":2,"masterID":33832951,"updateTime":1563997775835,"_id":"azuEf3pSQkk158q5"}
+{"roomID":2659665,"raffle":55,"masterID":2527673,"updateTime":1563997821813,"_id":"aXB1FtuGccdV18A7","beatStorm":49,"lottery":57,"smallTV":9,"pklottery":4}
+{"_id":"b6G2h0zTSXOBoS1u","roomID":2301751,"smallTV":28,"beatStorm":151,"masterID":4690327,"updateTime":1563997865647,"raffle":57,"lottery":215}
+{"roomID":13991750,"pklottery":1,"masterID":254632819,"updateTime":1563997920958,"_id":"Ow4qfPoCSmbpny0X"}
+{"_id":"q2YicSBNnfFLWhd5","roomID":11420618,"smallTV":48,"beatStorm":185,"raffle":132,"masterID":59368261,"updateTime":1563998108131,"lottery":196,"pklottery":4}
+{"roomID":2659665,"raffle":55,"masterID":2527673,"updateTime":1563998194362,"_id":"aXB1FtuGccdV18A7","beatStorm":49,"lottery":58,"smallTV":9,"pklottery":4}
+{"roomID":2659665,"raffle":56,"masterID":2527673,"updateTime":1563998221717,"_id":"aXB1FtuGccdV18A7","beatStorm":49,"lottery":58,"smallTV":9,"pklottery":4}
