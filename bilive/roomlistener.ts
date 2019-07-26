@@ -114,7 +114,8 @@ class RoomListener extends EventEmitter {
     const liveNumber = liveRooms.body.data.num
     let roomSet: Set<number> = new Set()
     let connectNumber: number = liveNumber
-    if (Options._.config.globalListenNum > -1) connectNumber = Options._.config.globalListenNum
+    if (Options._.config.globalListenNum > -1 && connectNumber > Options._.config.globalListenNum)
+      connectNumber = Options._.config.globalListenNum
     for (let i = 1; i <= Math.ceil(connectNumber / 500); i++) {
       let allRoom = await tools.XHR<allRooms>({
         uri: `https://api.live.bilibili.com/room/v1/Area/getListByAreaID?page=${i}&pageSize=500`,
