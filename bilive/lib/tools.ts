@@ -191,7 +191,7 @@ class Tools extends EventEmitter {
       const sendtoadmin: request.Options = {
         method: 'POST',
         uri: `https://sc.ftqq.com/${adminServerChan}.send`,
-        body: `text=bilive_client&desp=${message}`
+        body: `text=bilive_server&desp=${message}`
       }
       this.XHR<serverChan>(sendtoadmin)
     }
