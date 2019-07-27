@@ -18,18 +18,17 @@ interface server {
   hostname: string
   port: number
   protocol: string
+  netkey: string
 }
 interface config {
-  [index: string]: number | string | string[]
+  [index: string]: number | boolean | string | string[]
   dbTime: number
-  resetTime: number
+  globalListener: boolean
+  globalListenNum: number
   adminServerChan: string
   liveOrigin: string
   apiVCOrigin: string
   apiLiveOrigin: string
-  smallTVPathname: string
-  rafflePathname: string
-  lotteryPathname: string
   excludeCMD: string[]
   sysmsg: string
 }
@@ -45,6 +44,7 @@ interface userData {
   smallTV: boolean
   raffle: boolean
   lottery: boolean
+  pklottery: boolean
   beatStorm: boolean
 }
 interface optionsInfo {
@@ -52,9 +52,6 @@ interface optionsInfo {
   liveOrigin: configInfoData
   apiVCOrigin: configInfoData
   apiLiveOrigin: configInfoData
-  smallTVPathname: configInfoData
-  rafflePathname: configInfoData
-  lotteryPathname: configInfoData
   excludeCMD: configInfoData
   sysmsg: configInfoData
   status: configInfoData
@@ -64,6 +61,7 @@ interface optionsInfo {
   smallTV: configInfoData
   raffle: configInfoData
   lottery: configInfoData
+  pklottery: configInfoData
   beatStorm: configInfoData
 }
 interface configInfoData {
@@ -126,6 +124,31 @@ interface DMdanmakuError {
   status: dmErrorStatus.danmaku
   error: TypeError
   data: Buffer
+}
+// 弹幕服务器
+interface danmuInfo {
+  code: number
+  message: string
+  ttl: number
+  data: danmuInfoData
+}
+interface danmuInfoData {
+  refresh_row_factor: number
+  refresh_rate: number
+  max_delay: number
+  token: string
+  host_list: danmuInfoDataHostList[]
+  ip_list: danmuInfoDataIPList[]
+}
+interface danmuInfoDataHostList {
+  host: string
+  port: number
+  wss_port: number
+  ws_port: number
+}
+interface danmuInfoDataIPList {
+  host: string
+  port: number
 }
 /*******************
  *** app_client ****
@@ -256,6 +279,15 @@ interface XHRresponse<T> {
   body: T
 }
 /**
+ * 客户端消息
+ *
+ * @interface systemMSG
+ */
+interface systemMSG {
+  message: string
+  options: options
+}
+/**
  * Server酱
  *
  * @interface serverChan
@@ -290,7 +322,7 @@ interface roomList {
  * @interface raffleMessage
  */
 interface raffleMessage {
-  cmd: 'smallTV' | 'raffle'
+  cmd: 'raffle'
   roomID: number
   id: number
   type: string
@@ -305,7 +337,7 @@ interface raffleMessage {
  * @interface lotteryMessage
  */
 interface lotteryMessage {
-  cmd: 'lottery'
+  cmd: 'lottery' | 'pklottery'
   roomID: number
   id: number
   type: string
@@ -321,6 +353,7 @@ interface beatStormMessage {
   cmd: 'beatStorm'
   roomID: number
   id: number
+  num: number
   type: string
   title: string
   time: number
@@ -333,90 +366,91 @@ interface beatStormMessage {
 interface systemMessage {
   cmd: 'sysmsg'
   msg: string
+  ts?: string
 }
-type message = raffleMessage | lotteryMessage | beatStormMessage | systemMessage
+type message = systemMessage | raffleMessage | lotteryMessage | beatStormMessage
 /*******************
  **** listener *****
  *******************/
 /**
- * 抽奖raffle检查
+ * 统一抽奖信息
  *
- * @interface raffleCheck
+ * @interface lotteryInfo
  */
-interface raffleCheck {
+interface lotteryInfo {
   code: number
-  msg: string
   message: string
-  data: raffleCheckData
+  ttl: number
+  data: lotteryInfoData
 }
-interface raffleCheckData {
-  last_raffle_id: number
-  last_raffle_type: string
-  asset_animation_pic: string
-  asset_tips_pic: string
-  list: raffleCheckDataList[]
+interface lotteryInfoData {
+  activity_box: null
+  bls_box: null
+  gift_list: lotteryInfoDataGiftList[]
+  guard: lotteryInfoDataGuard[]
+  pk: lotteryInfoDataPk[]
+  slive_box: lotteryInfoDataSilverBox
+  storm: lotteryInfoDataStorm
 }
-interface raffleCheckDataList {
+interface lotteryInfoDataGiftList {
   raffleId: number
   title: string
   type: string
-  from: string
-  from_user: raffleCheckDataListFromuser
+  payflow_id: number
+  from_user: lotteryInfoDataGiftListFromUser
   time_wait: number
   time: number
   max_time: number
   status: number
   asset_animation_pic: string
   asset_tips_pic: string
+  sender_type: number
 }
-interface raffleCheckDataListFromuser {
+interface lotteryInfoDataGiftListFromUser {
   uname: string
   face: string
 }
-/**
- * 抽奖lottery检查
- *
- * @interface lotteryCheck
- */
-interface lotteryCheck {
-  code: number
-  msg: string
-  message: string
-  data: lotteryCheckData
-}
-interface lotteryCheckData {
-  guard: lotteryCheckDataGuard[]
-  storm: lotteryCheckDataStorm[]
-}
-interface lotteryCheckDataGuard {
+interface lotteryInfoDataGuard {
   id: number
-  sender: lotteryCheckDataSender
+  sender: lotteryInfoDataGuardSender
   keyword: string
+  privilege_type: number
   time: number
   status: number
-  mobile_display_mode: number
-  mobile_static_asset: string
-  mobile_animation_asset: string
+  payflow_id: string
 }
-interface lotteryCheckDataStorm {
-  id: number
-  sender: lotteryCheckDataSender
-  keyword: string
-  time: number
-  status: number
-  mobile_display_mode: number
-  mobile_static_asset: string
-  mobile_animation_asset: string
-  extra: lotteryCheckDataStormExtra
-}
-interface lotteryCheckDataStormExtra {
-  num: number
-  content: string
-}
-interface lotteryCheckDataSender {
+interface lotteryInfoDataGuardSender {
   uid: number
   uname: string
   face: string
+}
+interface lotteryInfoDataPk {
+  id: number
+  pk_id: number
+  room_id: number
+  time: number
+  status: number
+  asset_icon: string
+  asset_animation_pic: string
+  title: string
+  max_time: number
+}
+interface lotteryInfoDataSilverBox {
+  minute: number
+  silver: number
+  time_end: number
+  time_start: number
+  times: number
+  max_times: number
+  status: number
+}
+interface lotteryInfoDataStorm {
+  id: number
+  num: number
+  time: number
+  content: string
+  hadJoin: number
+  storm_gif: string
 }
 /**
  * 获取直播列表

@@ -3,88 +3,18 @@
     "path": "",
     "hostname": "",
     "port": 20080,
-    "protocol": "admin"
+    "protocol": "admin",
+    "netkey": ""
   },
   "config": {
     "dbTime": 30,
-    "resetTime": 120,
     "adminServerChan": "",
+    "globalListener": false,
+    "globalListenNum": -1,
     "liveOrigin": "https://live.bilibili.com",
     "apiLiveOrigin": "https://api.live.bilibili.com",
     "apiVCOrigin": "https://api.vc.bilibili.com",
-    "smallTVPathname": "/gift/v4/smalltv",
-    "rafflePathname": "/activity/v1/Raffle",
-    "lotteryPathname": "/lottery/v1/lottery",
-    "excludeCMD": [
-      "DANMU_MSG",
-      "SEND_GIFT",
-      "SYS_MSG",
-      "SYS_GIFT",
-      "COMBO_SEND",
-      "COMBO_END",
-      "WELCOME",
-      "WELCOME_GUARD",
-      "WELCOME_ACTIVITY",
-      "ENTRY_EFFECT",
-      "GUARD_BUY",
-      "GUARD_MSG",
-      "EVENT_CMD",
-      "RAFFLE_START",
-      "RAFFLE_END",
-      "NOTICE_MSG",
-      "TV_START",
-      "TV_END",
-      "EVENT_CMD",
-      "LOTTERY_START",
-      "GUARD_LOTTERY_START",
-      "SPECIAL_GIFT",
-      "PREPARING",
-      "LIVE",
-      "ROOM_SILENT_ON",
-      "ROOM_SILENT_OFF",
-      "ROOM_SHIELD",
-      "ROOM_BLOCK_MSG",
-      "ROOM_ADMINS",
-      "CHANGE_ROOM_INFO",
-      "WISH_BOTTLE",
-      "ACTIVITY_EVENT",
-      "WARNING",
-      "CUT_OFF",
-      "ROOM_LOCK",
-      "ROOM_RANK",
-      "PK_INVITE_INIT",
-      "PK_INVITE_REFUSE",
-      "PK_INVITE_CANCEL",
-      "PK_INVITE_FAIL",
-      "PK_INVITE_SWITCH_OPEN",
-      "PK_INVITE_SWITCH_CLOSE",
-      "PK_MATCH",
-      "PK_PRE",
-      "PK_START",
-      "PK_PROCESS",
-      "PK_END",
-      "PK_SETTLE",
-      "PK_CLICK_AGAIN",
-      "PK_AGAIN",
-      "PK_MIC_END",
-      "USER_TITLE_GET",
-      "DRAW_UPDATE",
-      "USER_GAIN_MEDAL",
-      "LITTLE_TIPS",
-      "room_admin_entrance",
-      "USER_TOAST_MSG",
-      "HOUR_RANK_AWARDS",
-      "USER_INFO_UPDATE",
-      "MESSAGEBOX_USER_GAIN_MEDAL",
-      "LOL_ACTIVITY",
-      "new_anchor_reward",
-      "ROOM_SKIN_MSG",
-      "SCORE_CARD",
-      "ROOM_REAL_TIME_MESSAGE_UPDATE",
-      "WIN_ACTIVITY",
-      "LUCK_GIFT_AWARD_USER",
-      "LUCK_GIFT_AWARD_MASTER"
-    ],
+    "excludeCMD": [],
     "sysmsg": ""
   },
   "user": {},
@@ -93,20 +23,25 @@
     "userHash": "",
     "welcome": "已连接到服务器",
     "usermsg": "",
-    "smallTV": false,
     "raffle": false,
     "lottery": false,
+    "pklottery": false,
     "beatStorm": false
   },
   "info": {
     "dbTime": {
       "description": "活跃房间时间",
-      "tip": "监听过去N天内的活跃房间",
+      "tip": "监听过去N天内的活跃房间，适用于数据库内房间监听",
       "type": "number"
     },
-    "resetTime": {
-      "description": "连接重设时间",
-      "tip": "每隔一段时间重新连接数据库，以小时为单位",
+    "globalListener": {
+      "description": "开播房间监听",
+      "tip": "对所有开播房间进行监听，可能会导致网络问题，慎用",
+      "type": "boolean"
+    },
+    "globalListenNum": {
+      "description": "监听开播房间数",
+      "tip": "默认为-1，表示对所有开播房间进行监听，只在开启全局监听时有效",
       "type": "number"
     },
     "adminServerChan": {
@@ -127,21 +62,6 @@
     "apiVCOrigin": {
       "description": "直播消息API",
       "tip": "直播消息API地址",
-      "type": "string"
-    },
-    "smallTVPathname": {
-      "description": "小电视路径",
-      "tip": "小电视抽奖路径",
-      "type": "string"
-    },
-    "rafflePathname": {
-      "description": "raffle路径",
-      "tip": "raffle抽奖路径",
-      "type": "string"
-    },
-    "lotteryPathname": {
-      "description": "lottery路径",
-      "tip": "lottery抽奖路径",
       "type": "string"
     },
     "excludeCMD": {
@@ -174,11 +94,6 @@
       "tip": "向该用户组下的所有用户发送广播",
       "type": "string"
     },
-    "smallTV": {
-      "description": "小电视抽奖",
-      "tip": "是否向该用户组发送小电视抽奖消息",
-      "type": "boolean"
-    },
     "raffle": {
       "description": "raffle类抽奖",
       "tip": "是否向该用户组发送raffle类抽奖消息, 例如活动抽奖",
@@ -187,6 +102,11 @@
     "lottery": {
       "description": "lottery类抽奖",
       "tip": "是否向该用户组发送lottery类抽奖消息, 例如舰队抽奖",
+      "type": "boolean"
+    },
+    "pklottery": {
+      "description": "pklottery类抽奖",
+      "tip": "是否向该用户组发送pklottery类抽奖消息, 如大乱斗抽奖",
       "type": "boolean"
     },
     "beatStorm": {
