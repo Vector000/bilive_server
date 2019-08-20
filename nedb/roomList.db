@@ -12589,6 +12589,7 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"roomID":351859,"smallTV":16,"masterID":33859078,"updateTime":1566244640695,"_id":"g83fIW3kfaxbdy6W","raffle":83,"lottery":167,"beatStorm":50,"pklottery":5}
-{"roomID":21559490,"pklottery":2,"masterID":426211157,"updateTime":1566244693800,"_id":"UiiRwagfabIJJcgg","lottery":1}
-{"roomID":1623420,"raffle":9,"masterID":23017447,"updateTime":1566244726357,"_id":"KeQp94ipvJ1edsNh","lottery":70,"beatStorm":21,"pklottery":7}
+{"_id":"osu4y5BRdDyyzqTB","roomID":2425420,"beatStorm":71,"smallTV":2,"masterID":12120515,"raffle":4,"updateTime":1566331113427,"lottery":7}
+{"_id":"pKpDELHaHK8VBP4A","roomID":4719881,"raffle":1001,"smallTV":369,"masterID":84127823,"beatStorm":861,"updateTime":1566331120933,"lottery":732,"pklottery":9}
+{"roomID":21387272,"raffle":1,"masterID":421405680,"updateTime":1566331166335,"_id":"XEoO9U91ipJVJJ7Y","lottery":2,"pklottery":4,"beatStorm":1}
+{"_id":"ogUwCIYmAJXBBiUS","roomID":479592,"smallTV":636,"raffle":1488,"beatStorm":1253,"masterID":539998,"updateTime":1566331198035,"lottery":423,"pklottery":17}
