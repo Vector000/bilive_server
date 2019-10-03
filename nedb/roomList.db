@@ -13319,7 +13319,11 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"roomID":21585840,"raffle":19,"masterID":456990350,"updateTime":1570045949685,"_id":"6WuDmixizn1Ml1pO","beatStorm":8,"lottery":10,"pklottery":7}
-{"_id":"7nM4OCnXCiRhhJP5","roomID":6806787,"raffle":302,"beatStorm":175,"smallTV":336,"masterID":85607102,"updateTime":1570046157791,"lottery":203,"pklottery":32}
-{"_id":"yy6TI6A9XsauxtwT","roomID":3509872,"smallTV":6,"beatStorm":30,"raffle":11,"masterID":9035182,"updateTime":1570046382046,"lottery":39,"pklottery":14}
-{"_id":"yy6TI6A9XsauxtwT","roomID":3509872,"smallTV":6,"beatStorm":30,"raffle":12,"masterID":9035182,"updateTime":1570046388226,"lottery":39,"pklottery":14}
+{"_id":"aBHMagnSUZXYeJyV","roomID":8019494,"smallTV":17,"raffle":85,"beatStorm":102,"masterID":10785776,"updateTime":1570132403086,"lottery":223}
+{"roomID":2106735,"smallTV":1,"masterID":16967644,"updateTime":1570132416980,"_id":"ErUWc0CMQAxXpk51","raffle":110,"beatStorm":25,"lottery":29,"pklottery":26}
+{"roomID":10783708,"pklottery":16,"masterID":210371230,"updateTime":1570132468975,"_id":"QrcPATAZtmI5SeeU","raffle":5,"lottery":6,"beatStorm":3}
+{"_id":"QLHfKOxzUrcLzfMW","roomID":982077,"smallTV":339,"beatStorm":468,"raffle":756,"masterID":16692120,"updateTime":1570132546345,"lottery":490,"pklottery":14}
+{"_id":"QLHfKOxzUrcLzfMW","roomID":982077,"smallTV":339,"beatStorm":468,"raffle":756,"masterID":16692120,"updateTime":1570132645306,"lottery":491,"pklottery":14}
+{"roomID":351859,"smallTV":16,"masterID":33859078,"updateTime":1570132688945,"_id":"g83fIW3kfaxbdy6W","raffle":99,"lottery":189,"beatStorm":59,"pklottery":5}
+{"roomID":21330414,"raffle":12,"masterID":39964093,"updateTime":1570132755102,"_id":"XXQnRkx90KbSQhOY","lottery":14,"beatStorm":6,"pklottery":3}
+{"roomID":351859,"smallTV":16,"masterID":33859078,"updateTime":1570132800365,"_id":"g83fIW3kfaxbdy6W","raffle":99,"lottery":189,"beatStorm":60,"pklottery":5}
