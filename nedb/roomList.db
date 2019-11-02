@@ -13540,4 +13540,3 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"roomID":21585497,"pklottery":5,"masterID":470833713,"updateTime":1572638380512,"_id":"MrYOSNW1Zq2fjYSh","lottery":12,"beatStorm":1,"raffle":2}
