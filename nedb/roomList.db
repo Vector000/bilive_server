@@ -13704,8 +13704,10 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"roomID":21301839,"lottery":144,"masterID":22871593,"updateTime":1573155758704,"_id":"bMFlHBg1EoqAXJP6","raffle":64,"beatStorm":34,"smallTV":1,"pklottery":30}
-{"roomID":852991,"raffle":110,"masterID":13410681,"updateTime":1573155948042,"_id":"OuSg03XqFpC0RG2v","beatStorm":161,"lottery":230,"smallTV":70,"pklottery":27}
-{"_id":"QLHfKOxzUrcLzfMW","roomID":982077,"smallTV":339,"beatStorm":475,"raffle":761,"masterID":16692120,"updateTime":1573155973936,"lottery":502,"pklottery":22}
-{"_id":"QLHfKOxzUrcLzfMW","roomID":982077,"smallTV":339,"beatStorm":475,"raffle":761,"masterID":16692120,"updateTime":1573156029033,"lottery":503,"pklottery":22}
-{"roomID":9549723,"raffle":28,"masterID":4053453,"updateTime":1573156744588,"_id":"mhzT6xFmjr5znOmy","beatStorm":121,"lottery":76,"smallTV":8}
+{"roomID":21249658,"raffle":97,"masterID":399525915,"updateTime":1573242054631,"_id":"WlCHYbOsmdN29DqK","lottery":250,"beatStorm":90,"smallTV":7,"pklottery":24}
+{"_id":"Y7SvRTm419CdypWp","roomID":41029,"beatStorm":118,"smallTV":44,"raffle":72,"masterID":10414152,"updateTime":1573242067281,"lottery":95}
+{"_id":"QbvlJ8uO1gnIv0kT","roomID":80588,"smallTV":45,"raffle":184,"beatStorm":324,"masterID":2337891,"updateTime":1573242138564,"lottery":481}
+{"roomID":21539718,"raffle":15,"masterID":452542820,"updateTime":1573242240696,"_id":"hLNPKITi6fEGpni0","beatStorm":5,"lottery":9}
+{"_id":"zbkOFmTMGRGaSAdx","roomID":14222920,"smallTV":89,"beatStorm":196,"raffle":465,"masterID":345819190,"updateTime":1573242476337,"lottery":476}
+{"roomID":317437,"raffle":65,"masterID":2097994,"updateTime":1573242589456,"_id":"2StElfbAIXHlF88K","lottery":83,"beatStorm":51,"smallTV":5,"pklottery":24}
+{"roomID":9549723,"raffle":28,"masterID":4053453,"updateTime":1573242874387,"_id":"mhzT6xFmjr5znOmy","beatStorm":122,"lottery":75,"smallTV":8}
