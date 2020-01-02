@@ -15122,8 +15122,4 @@
 {"_id":"zzlWF10d4xgK095F","roomID":7384143,"raffle":7,"masterID":262632476,"beatStorm":9,"smallTV":2,"updateTime":1552140769350,"lottery":3}
 {"$$indexCreated":{"fieldName":"updateTime","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"roomID","unique":false,"sparse":false}}
-{"roomID":21742849,"raffle":1,"masterID":43466186,"updateTime":1577908589965,"_id":"rSUv29MgWa9HPbPy"}
-{"roomID":21195828,"pklottery":10,"masterID":271887040,"updateTime":1577908607844,"_id":"UNvCVLfO31rT3FKP","beatStorm":2,"raffle":7,"lottery":17}
-{"roomID":21539718,"raffle":84,"masterID":452542820,"updateTime":1577908679095,"_id":"hLNPKITi6fEGpni0","beatStorm":23,"lottery":53,"pklottery":8}
-{"roomID":4316215,"raffle":27,"masterID":39267739,"updateTime":1577908720333,"_id":"mGQ2ZBRcUnWiSSLU","beatStorm":36,"lottery":141}
-{"roomID":21742849,"raffle":1,"masterID":43466186,"updateTime":1577908737392,"_id":"rSUv29MgWa9HPbPy","beatStorm":1}
+{"roomID":11067408,"pklottery":34,"masterID":324891861,"updateTime":1577995055240,"_id":"6wjDVoTqkMuFu29c","lottery":27,"raffle":24,"beatStorm":12}
